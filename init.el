@@ -248,18 +248,18 @@
 
 (global-prettify-symbols-mode +1)
 
-(electric-pair-mode 1)
+;;  (electric-pair-mode 1)
 
-(use-package paren
-  :commands (show-paren-mode)
-  :hook (after-init . show-paren-mode)
-  :custom
-  (show-paren-delay 0)
-  :config
-  (set-face-foreground 'show-paren-match "green4")
-  (set-face-foreground 'show-paren-mismatch "#f00")
-  (set-face-attribute 'show-paren-match nil :weight 'extra-bold)
-  (set-face-attribute 'show-paren-mismatch nil :weight 'extra-bold))
+;; (use-package paren
+;;   :commands (show-paren-mode)
+;;   :hook (after-init . show-paren-mode)
+;;   :custom
+;;   (show-paren-delay 0)
+;;   :config
+;;   (set-face-foreground 'show-paren-match "green4")
+;;   (set-face-foreground 'show-paren-mismatch "#f00")
+;;   (set-face-attribute 'show-paren-match nil :weight 'extra-bold)
+;;   (set-face-attribute 'show-paren-mismatch nil :weight 'extra-bold))
 
 
 
@@ -277,6 +277,11 @@
 ;;This minor mode wrap lines at fill-column instead endge of screen
 ;;(use-package visual-fill-column
 ;;  :hook (text-mode . visual-fill-column-mode))
+
+(use-package smartparens
+  :config (progn (show-smartparens-global-mode t))
+  :hook
+  (prog-mode . turn-on-smartparens-strict-mode))
 
 (use-package helpful
   :commands (helpful-at-point helpful-command)
@@ -332,8 +337,6 @@
 (use-package amx)
 
 (use-package ibuffer :bind ("C-x C-b" . ibuffer))
-
-;;(use-package dired-hacks)
 
 (use-package all-the-icons :demand)
 
@@ -950,6 +953,8 @@
 :after lsp-mode
 :config (dap-auto-configure-mode))
 
+;;(use-package slime)
+
 ;; (defun fix-org-git-version ()
 ;;   "The Git version of org-mode.
 ;;   Inserted by installing org-mode or when a release is made."
@@ -1243,10 +1248,16 @@
 
 (use-package yasnippet-snippets)
 
-;;  (use-package maxima)			;
+;;  (use-package maxima)
 
 (use-package diminish)
 (use-package delight)
+
+;;MODELINE config
+;;===============================================================
+(use-package doom-modeline
+  :hook (after-init . doom-modeline-mode)
+  :custom (doom-modeline-buffer-file-name-style 'relative-to-project))
 
 (use-package which-key
   :delight 
@@ -1267,10 +1278,57 @@
 (use-package doom-themes 
 :init (load-theme 'doom-dracula t))
 
-;;MODELINE themes
-;;===============================================================
-(use-package doom-modeline
-  :hook (after-init . doom-modeline-mode))
+(use-package rainbow-mode
+  :init (rainbow-mode 1))
+
+;; Functions for random set color for
+;;=====================================================================================
+(require 'color)
+(defun gen-col-list (length s v &optional hval)
+  (cl-flet ( (random-float () (/ (random 10000000000) 10000000000.0))
+          (mod-float (f) (- f (ffloor f))) )
+    (unless hval
+      (setq hval (random-float)))
+    (let ((golden-ratio-conjugate (/ (- (sqrt 5) 1) 2))
+          (h hval)
+          (current length)
+          (ret-list '()))
+      (while (> current 0)
+        (setq ret-list
+              (append ret-list
+                      (list (apply 'color-rgb-to-hex (color-hsl-to-rgb h s v)))))
+        (setq h (mod-float (+ h golden-ratio-conjugate)))
+        (setq current (- current 1)))
+      ret-list)))
+
+(defun set-random-rainbow-colors (s l &optional h)
+  ;; Output into message buffer in case you get a scheme you REALLY like.
+  ;; (message "set-random-rainbow-colors %s" (list s l h))
+  (interactive)
+  (rainbow-delimiters-mode t)
+
+  ;; Show mismatched braces in bright red.
+  (set-face-background 'rainbow-delimiters-unmatched-face "red")
+
+  ;; Rainbow delimiters based on golden ratio
+  (let ( (colors (gen-col-list 9 s l h))
+         (i 1) )
+    (let ( (length (length colors)) )
+      ;;(message (concat "i " (number-to-string i) " length " (number-to-string length)))
+      (while (<= i length)
+        (let ( (rainbow-var-name (concat "rainbow-delimiters-depth-" (number-to-string i) "-face"))
+               (col (nth i colors)) )
+          ;; (message (concat rainbow-var-name " => " col))
+          (set-face-foreground (intern rainbow-var-name) col))
+        (setq i (+ i 1))))))
+
+(use-package rainbow-delimiters
+  :commands rainbow-delimiters-mode
+  :init
+  (setq rainbow-delimiters-max-face-count 16)
+ (set-random-rainbow-colors 0.6 0.7 0.5)
+  :hook
+  (prog-mode . rainbow-delimiters-mode))
 
 (use-package dashboard
   :config
