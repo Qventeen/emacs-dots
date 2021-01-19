@@ -106,6 +106,7 @@
 
 (defvar q/home-directory (expand-file-name "~/"))
 (defvar q/data-directory (concat q/home-directory ".emacs.d/"))
+(defvar q/config-directory (concat q/data-directory "configs/"))
 (defvar q/projects-directory (concat q/home-directory "projects/"))
 (defvar q/sources-directory (concat q/home-directory "src/"))
 (defvar q/org-directory (concat q/home-directory "org/"))
@@ -121,6 +122,9 @@
 
 (defun q/get-org-file (file-name)
   (concat q/org-directory file-name))
+
+(defun q/get-config-file (file-name)
+  (concat q/config-directory file-name))
 
 (defun q/get-project-directory (name)
   (concat q/projects-directory name))
@@ -279,9 +283,111 @@
 ;;  :hook (text-mode . visual-fill-column-mode))
 
 (use-package smartparens
-  :config (progn (show-smartparens-global-mode t))
+  :config
+  (require 'smartparens-config)
+  (progn (show-smartparens-global-mode t))
   :hook
-  (prog-mode . turn-on-smartparens-strict-mode))
+  (prog-mode . turn-on-smartparens-strict-mode)
+  :bind (:map smartparens-mode-map
+	      ("C-M-a" . sp-beginning-of-sexp)
+	      ("C-M-e" . sp-end-of-sexp)
+;;	        ("C-<up>" . sp-up-sexp)
+;;  	        ("C-<down>" . sp-down-sexp)
+;;              ("M-<up>" . sp-backward-up-sexp)
+;;              ("M-<down>" . sp-backward-down-sexp)
+	      ("C-M-f" . sp-forward-sexp)
+	      ("C-M-b" . sp-backward-sexp)
+	      ("C-M-n" . sp-next-sexp)
+	      ("C-M-P" . sp-prev-sexp)
+	      ))
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;; keybinding management
+;; (use-package smartparens
+;; (define-key smartparens-mode-map (kbd "C-M-f") 'sp-forward-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-b") 'sp-backward-sexp)
+
+;; (define-key smartparens-mode-map (kbd "C-M-d") 'sp-down-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-a") 'sp-backward-down-sexp)
+;; (define-key smartparens-mode-map (kbd "C-S-d") 'sp-beginning-of-sexp)
+;; (define-key smartparens-mode-map (kbd "C-S-a") 'sp-end-of-sexp)
+
+;; (define-key smartparens-mode-map (kbd "C-M-e") 'sp-up-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-u") 'sp-backward-up-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-t") 'sp-transpose-sexp)
+
+;; (define-key smartparens-mode-map (kbd "C-M-n") 'sp-forward-hybrid-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-p") 'sp-backward-hybrid-sexp)
+
+;; (define-key smartparens-mode-map (kbd "C-M-k") 'sp-kill-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-w") 'sp-copy-sexp)
+
+;; (define-key smartparens-mode-map (kbd "M-<delete>") 'sp-unwrap-sexp)
+;; (define-key smartparens-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)
+
+;; (define-key smartparens-mode-map (kbd "C-<right>") 'sp-forward-slurp-sexp)
+;; (define-key smartparens-mode-map (kbd "C-<left>") 'sp-forward-barf-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-<left>") 'sp-backward-slurp-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-<right>") 'sp-backward-barf-sexp)
+
+;; (define-key smartparens-mode-map (kbd "M-D") 'sp-splice-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-<delete>") 'sp-splice-sexp-killing-forward)
+;; (define-key smartparens-mode-map (kbd "C-M-<backspace>") 'sp-splice-sexp-killing-backward)
+;; (define-key smartparens-mode-map (kbd "C-S-<backspace>") 'sp-splice-sexp-killing-around)
+
+;; (define-key smartparens-mode-map (kbd "C-]") 'sp-select-next-thing-exchange)
+;; (define-key smartparens-mode-map (kbd "C-<left_bracket>") 'sp-select-previous-thing)
+;; (define-key smartparens-mode-map (kbd "C-M-]") 'sp-select-next-thing)
+
+;; (define-key smartparens-mode-map (kbd "M-F") 'sp-forward-symbol)
+;; (define-key smartparens-mode-map (kbd "M-B") 'sp-backward-symbol)
+
+;; (define-key smartparens-mode-map (kbd "C-\"") 'sp-change-inner)
+;; (define-key smartparens-mode-map (kbd "M-i") 'sp-change-enclosing)
+
+;; (bind-key "C-c f" (lambda () (interactive) (sp-beginning-of-sexp 2)) smartparens-mode-map)
+;; (bind-key "C-c b" (lambda () (interactive) (sp-beginning-of-sexp -2)) smartparens-mode-map)
+
+;; (bind-key "C-M-s"
+;;           (defhydra smartparens-hydra ()
+;;             "Smartparens"
+;;             ("d" sp-down-sexp "Down")
+;;             ("e" sp-up-sexp "Up")
+;;             ("u" sp-backward-up-sexp "Up")
+;;             ("a" sp-backward-down-sexp "Down")
+;;             ("f" sp-forward-sexp "Forward")
+;;             ("b" sp-backward-sexp "Backward")
+;;             ("k" sp-kill-sexp "Kill" :color blue)
+;;             ("q" nil "Quit" :color blue))
+;;           smartparens-mode-map)
+
+;; (bind-key "H-t" 'sp-prefix-tag-object smartparens-mode-map)
+;; (bind-key "H-p" 'sp-prefix-pair-object smartparens-mode-map)
+;; (bind-key "H-y" 'sp-prefix-symbol-object smartparens-mode-map)
+;; (bind-key "H-h" 'sp-highlight-current-sexp smartparens-mode-map)
+;; (bind-key "H-e" 'sp-prefix-save-excursion smartparens-mode-map)
+;; (bind-key "H-s c" 'sp-convolute-sexp smartparens-mode-map)
+;; (bind-key "H-s a" 'sp-absorb-sexp smartparens-mode-map)
+;; (bind-key "H-s e" 'sp-emit-sexp smartparens-mode-map)
+;; (bind-key "H-s p" 'sp-add-to-previous-sexp smartparens-mode-map)
+;; (bind-key "H-s n" 'sp-add-to-next-sexp smartparens-mode-map)
+;; (bind-key "H-s j" 'sp-join-sexp smartparens-mode-map)
+;; (bind-key "H-s s" 'sp-split-sexp smartparens-mode-map)
+;; (bind-key "H-s r" 'sp-rewrap-sexp smartparens-mode-map)
+;; (defvar hyp-s-x-map)
+;; (define-prefix-command 'hyp-s-x-map)
+;; (bind-key "H-s x" hyp-s-x-map smartparens-mode-map)
+;; (bind-key "H-s x x" 'sp-extract-before-sexp smartparens-mode-map)
+;; (bind-key "H-s x a" 'sp-extract-after-sexp smartparens-mode-map)
+;; (bind-key "H-s x s" 'sp-swap-enclosing-sexp smartparens-mode-map)
+
+;; (bind-key "C-x C-t" 'sp-transpose-hybrid-sexp smartparens-mode-map)
+
+;; (bind-key ";" 'sp-comment emacs-lisp-mode-map)
+
+;; (bind-key [remap c-electric-backspace] 'sp-backward-delete-char smartparens-strict-mode-map)
+
+;; )
 
 (use-package helpful
   :commands (helpful-at-point helpful-command)
@@ -757,7 +863,36 @@
 
 ;;(use-package phi-replace)
 
-(use-package multiple-cursors)
+(use-package region-bindings-mode
+  :commands (region-bindings-mode-enable)
+  ;;To think about hooks for program modes
+  :init (region-bindings-mode-enable))
+
+(use-package multiple-cursors
+  :after (region-bindings-mode)
+  :init (multiple-cursors-mode)
+  :bind 
+  (:map region-bindings-mode-map 
+	(("a" . mc/mark-all-like-this)
+	 ("p" . mc/mark-previous-like-this)
+	 ("n" . mc/mark-next-like-this)
+	 ("m" . mc/mark-more-like-this-extended))))
+
+(use-package edit-server
+  :commands edit-server-start
+  :init (if after-init-time
+              (edit-server-start)
+            (add-hook 'after-init-hook
+                      #'(lambda() (edit-server-start))))
+  :config (setq edit-server-new-frame-alist
+                '((name . "Edit with Emacs FRAME")
+                  (top . 300)
+                  (left . 300)
+                  (width . 50)
+                  (height . 15)
+                  (minibuffer . t)
+;;                  (menu-bar-lines . x ;TODO: )
+                  (window-system . x))))
 
 (use-package paradox)
 
@@ -768,9 +903,9 @@
 (use-package treemacs
   :defer t
   :commands (treemacs-follow-mode
-           treemacs-filewatch-mode
-           treemacs-fringe-indicator-mode
-           treemacs-git-mode)
+             treemacs-filewatch-mode
+             treemacs-fringe-indicator-mode
+             treemacs-git-mode)
   :config
   (progn
     (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
@@ -829,15 +964,15 @@
       (`(t . _)
        (treemacs-git-mode 'simple))))
   :bind (("M-1"       . treemacs-select-window)
-        ("C-x t 1"   . treemacs-delete-other-windows)
-        ("C-x t t"   . treemacs)
-        ("C-x t B"   . treemacs-bookmark)
-        ("C-x t C-t" . treemacs-find-file)
-        ("C-x t M-t" . treemacs-find-tag)
-  (:map treemacs-mode-map
-        ("C-n" . treemacs-next-neighbour)
-        ("C-p" . treemacs-previous-neighbour))))
-   ;;     ([mouse-1] . #'treemacs-single-click-expand-action))
+         ("C-x t 1"   . treemacs-delete-other-windows)
+         ("C-x t t"   . treemacs)
+         ("C-x t B"   . treemacs-bookmark)
+         ("C-x t C-t" . treemacs-find-file)
+         ("C-x t M-t" . treemacs-find-tag)
+	 (:map treemacs-mode-map
+               ("C-n" . treemacs-next-neighbour)
+               ("C-p" . treemacs-previous-neighbour))))
+;;     ([mouse-1] . #'treemacs-single-click-expand-action))
 
 
 
@@ -858,6 +993,7 @@
 ;;  :after treemacs persp-mode ;;or perspective vs. persp-mode
 ;;  :config (treemacs-set-scope-type 'Perspectives))
 
+(load (q/get-config-file "projectile-discovery.el"))
 (use-package projectile
   :demand
   :init (projectile-mode +1)
@@ -865,13 +1001,16 @@
   (projectile-complection-system 'ivy)
   (projectile-indexing-method 'hybrid)
   (projectile-sort-order 'recentf)
-
+  (projectile-track-known-projects-automatically nil)
+  (projectile-auto-discover nil)
+  
   :bind (:map projectile-mode-map
 	      ("M-<f1>" . projectile-command-map)
 	      ("C-c p" . projectile-command-map) 
 	      ("M-p" . projectile-command-map))
   :config
   ;;Add paths for autodiscover projects at start
+  
   (setq projectile-project-search-path (list q/projects-directory q/sources-directory)
 	;;Config filteres by next link
 	;;https://gitlab.com/skybert/my-little-friends/blob/master/emacs/.emacs#L603
@@ -880,28 +1019,11 @@
 
 	projectile-globally-ignored-directories
 	(append (list
-                 "build"
-                 "elpa"
-                 "node_modules"
-                 "output"
-                 "target"
-		 "straight"
-		 "venv"
-		 "semanticdb"
-		 "reveal.js"
-		 "__pycache__"
-		 ".pytest_cache")
-                projectile-globally-ignored-directories)))
-
-
-
-;; :config
-;;  (setq projectile-project-root-files-bottom-up
-;;      '(".git" ".hg" "README.md" "README.org" "README" "pom.xml")
-;;      projectile-project-search-path '(q/projects-directory)
-;;      projectile-sort-order 'access-time))
-;;(projectile-discover-projects-in-directory q/projects-directory)
-;;(projectile-discover-projects-in-directory q/sources-directory))
+		 "build.*" "elpa.*" "node_modules" "output" "target.*" "straight" "repos"
+		 "venv" "semanticdb" "reveal.js" "__pycache__" ".pytest_cache" "cache.*"
+		 "package.*")
+                projectile-globally-ignored-directories)
+	))
 
 (use-package counsel-projectile
   :hook (after-init . counsel-projectile-mode))
@@ -954,6 +1076,10 @@
 :config (dap-auto-configure-mode))
 
 ;;(use-package slime)
+
+;;(use-package geiser)
+
+(use-package realgud)
 
 ;; (defun fix-org-git-version ()
 ;;   "The Git version of org-mode.
@@ -1058,12 +1184,24 @@
      :bind
      ("C-c j" . org-journal-new-entry))
 
+
+
+(use-package pandoc-mode
+  :commands (pandoc-load-default-settings)
+  :hook (pandoc-mode . pandoc-load-default-settings))
+
 (use-package markdown-mode
+  :after (pandoc-mode)
   :commands (markdown-mode gfm-mode)
-  :mode (("README\\.md\\'" . gfm-mode)
-         ("\\.md\\'" . markdown-mode)
-         ("\\.markdown\\'" . markdown-mode))
-  :hook (markdown-mode . pandoc-mode))
+  :mode 
+  ("README\\.md\\'" . gfm-mode)
+  ("\\.md\\'" . markdown-mode)
+  ("\\.markdown\\'" . markdown-mode)
+  :hook
+  (markdown-mode . pandoc-mode)
+  (gfm-mode . pandoc-mode)
+  :custom
+  (markdown-header-scaling t))
 
 (use-package plantuml-mode
   :after (org)
@@ -1272,6 +1410,10 @@
 ;;(use-package hydra)
 
 (use-package major-mode-hydra)
+
+(use-package command-log-mode
+  :custom
+  (command-log-mode-key-binding-open-log "<f12>"))
 
 ;;EMACS THEMES
 ;;===============================================================

@@ -23,8 +23,6 @@ Next, a hook that reports how long and how many garbage collections the startup 
              gcs-done))
 
   (add-hook 'emacs-startup-hook #'q/test-time-load)
-
-
 #+END_SRC
 
 We set =gc-cons-threshold= to its maximum value, to prevent any garbage collection from happening during load time. We also reset this value in the [[Epilogue][Epilogue]].
@@ -107,7 +105,7 @@ This module initialize startup package management
     (use-package-verbose t))
   ;;===========================================================================
 #+END_SRC
-** init gen (auto regenarate after change)
+** init gen (regenarate after change)
 #+NAME: autogen init.el
 #+BEGIN_SRC emacs-lisp
 ;;This function load init.el from init.org when file is modifed
@@ -142,18 +140,19 @@ many differend parameters. This mode keeps my init file clean
   (use-package org :demand t)        ;;org
 #+END_SRC
 ** local settings (current machine)
-*** linux paths
+*** linux-paths
 #+NAME: linux-paths
 #+BEGIN_SRC emacs-lisp
 (defvar q/home-directory (expand-file-name "~/"))
 (defvar q/data-directory (concat q/home-directory ".emacs.d/"))
+(defvar q/config-directory (concat q/data-directory "configs/"))
 (defvar q/projects-directory (concat q/home-directory "projects/"))
 (defvar q/sources-directory (concat q/home-directory "src/"))
 (defvar q/org-directory (concat q/home-directory "org/"))
 (defvar q/yas-directory (concat q/data-directory "yasnippet/"))
 
 #+END_SRC
-*** windows paths
+*** windows-paths
 On future
 #+NAME: windows-pahts
 #+BEGIN_SRC emacs-lisp
@@ -172,6 +171,11 @@ Calculate file paths relative to various locations.
   (defun q/get-org-file (file-name)
     (concat q/org-directory file-name))
 #+END_SRC
+**** q/get-config-file
+#+BEGIN_SRC emacs-lisp
+(defun q/get-config-file (file-name)
+  (concat q/config-directory file-name))
+#+END_SRC
 **** q/get-project-directory
 #+BEGIN_SRC emacs-lisp
   (defun q/get-project-directory (name)
@@ -182,7 +186,7 @@ Calculate file paths relative to various locations.
   (defun q/get-source-directory (name)
     (concat q/sources-directory name))
 #+END_SRC
-*** data paths
+*** data-paths
 #+NAME: data-pathes
 #+BEGIN_SRC emacs-lisp
   ;;org files
@@ -193,7 +197,11 @@ Calculate file paths relative to various locations.
   (defvar q/autosaves-directory (concat q/data-directory "autosaves/") "Main bookmarks file-name")
   (defvar q/backups-directory (concat q/data-directory "backups/") "Main bookmarks file-name")
 #+END_SRC
-*** external browser
+*** external-browser
+*** midifier-key-bind
+This page shows you how to define Super and Hyper keys in emacs
+[[http://ergoemacs.org/emacs/emacs_hyper_super_keys.html][XanEmacs tutorial bind]]
+
 * fixes
 ** package cl deprecated
 Emacs 27 and onward deprecates the built-in cl library (to be replaced with cl-lib). Emacs emits this warning whenever something, somewhere loads it at runtime. Doom does not use cl, but a number of 3rd party packages do, which is outside my control. Emacs offers no method to suppress the error and neither can Doom (trivially). Our only options are to ignore it and wait for packages upstream to catch up, or PR updates to those packages directly.
@@ -308,7 +316,6 @@ GNU Emacs package for selecting a window to switch to
 #+END_SRC
 **** backups
 Backups are created everytime a buffer is manually saved.
-
 #+NAME: backups
 #+BEGIN_SRC emacs-lisp
   ;;backup every save
@@ -496,7 +503,7 @@ Interactive Do package
 
 * ext
 ** TODO general
-*** DONE visual-fill-column
+*** visual-fill-column
 [[https://github.com/joostkremers/visual-fill-column][Visual-fill-column on Github]]
 #+NAME: visual-fill-column
 #+BEGIN_SRC emacs-lisp
@@ -507,27 +514,131 @@ Interactive Do package
 #+END_SRC
 Is a small Emacs minor mode that mimics the effect of fill-column in visual-line-mode. Instead of wrapping lines at the window edge, which is the standard behaviour of visual-line-mode, it wraps lines at fill-column. If fill-column is too large for the window, the text is wrapped at the window edge. Told in images, visual-fill-column turns the view on the left into the view on the right, without changing the contents of the file
 *** TODO smartparens
+Smartparens is minor mode for Emacs that deals with parens pairs
+and tries to be smart about it. 
 [[https://github.com/Fuco1/smartparens][Smartparens Github]]
-[[https://ebzzry.io/en/emacs-pairs/][Smartparens Manual]]
+**** base
 #+NAME: smartparent
 #+BEGIN_SRC emacs-lisp
-  
 (use-package smartparens
-  :config (progn (show-smartparens-global-mode t))
+  :config
+  (require 'smartparens-config)
+  (progn (show-smartparens-global-mode t))
   :hook
-  (prog-mode . turn-on-smartparens-strict-mode))
+  (prog-mode . turn-on-smartparens-strict-mode)
+  :bind (:map smartparens-mode-map
+	      ("C-M-a" . sp-beginning-of-sexp)
+	      ("C-M-e" . sp-end-of-sexp)
+;;	        ("C-<up>" . sp-up-sexp)
+;;  	        ("C-<down>" . sp-down-sexp)
+;;              ("M-<up>" . sp-backward-up-sexp)
+;;              ("M-<down>" . sp-backward-down-sexp)
+	      ("C-M-f" . sp-forward-sexp)
+	      ("C-M-b" . sp-backward-sexp)
+	      ("C-M-n" . sp-next-sexp)
+	      ("C-M-P" . sp-prev-sexp)
+	      ))
+
 #+End_SRC
-Smartparens is minor mode for Emacs that deals with parens pairs
-and tries to be smart about it.  It started as a unification effort
-to combine functionality of several existing packages in a single,
-compatible and extensible way to deal with parentheses, delimiters,
-tags and the like.  Some of these packages include autopair,
-textmate, wrap-region, electric-pair-mode, paredit and others.  With
-the basic features found in other packages it also brings many
-improvements as well as completely new features.
+
+**** bindings
+[[https://ebzzry.io/en/emacs-pairs/][Smartparens Manual]]
+[[https://gist.github.com/jsmestad/1059d15e8debf5f2e7e81c92052c67d2][Smartparens cheatsheet GitHub]]
+
+Experimental test of keybindings. This bindings i taken from emacs init file of developer of smaprparens package
+#+NAME: smartparens-keybindings
+#+BEGIN_SRC emacs-lisp
+;; ;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;; keybinding management
+;; (use-package smartparens
+;; (define-key smartparens-mode-map (kbd "C-M-f") 'sp-forward-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-b") 'sp-backward-sexp)
+
+;; (define-key smartparens-mode-map (kbd "C-M-d") 'sp-down-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-a") 'sp-backward-down-sexp)
+;; (define-key smartparens-mode-map (kbd "C-S-d") 'sp-beginning-of-sexp)
+;; (define-key smartparens-mode-map (kbd "C-S-a") 'sp-end-of-sexp)
+
+;; (define-key smartparens-mode-map (kbd "C-M-e") 'sp-up-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-u") 'sp-backward-up-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-t") 'sp-transpose-sexp)
+
+;; (define-key smartparens-mode-map (kbd "C-M-n") 'sp-forward-hybrid-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-p") 'sp-backward-hybrid-sexp)
+
+;; (define-key smartparens-mode-map (kbd "C-M-k") 'sp-kill-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-w") 'sp-copy-sexp)
+
+;; (define-key smartparens-mode-map (kbd "M-<delete>") 'sp-unwrap-sexp)
+;; (define-key smartparens-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)
+
+;; (define-key smartparens-mode-map (kbd "C-<right>") 'sp-forward-slurp-sexp)
+;; (define-key smartparens-mode-map (kbd "C-<left>") 'sp-forward-barf-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-<left>") 'sp-backward-slurp-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-<right>") 'sp-backward-barf-sexp)
+
+;; (define-key smartparens-mode-map (kbd "M-D") 'sp-splice-sexp)
+;; (define-key smartparens-mode-map (kbd "C-M-<delete>") 'sp-splice-sexp-killing-forward)
+;; (define-key smartparens-mode-map (kbd "C-M-<backspace>") 'sp-splice-sexp-killing-backward)
+;; (define-key smartparens-mode-map (kbd "C-S-<backspace>") 'sp-splice-sexp-killing-around)
+
+;; (define-key smartparens-mode-map (kbd "C-]") 'sp-select-next-thing-exchange)
+;; (define-key smartparens-mode-map (kbd "C-<left_bracket>") 'sp-select-previous-thing)
+;; (define-key smartparens-mode-map (kbd "C-M-]") 'sp-select-next-thing)
+
+;; (define-key smartparens-mode-map (kbd "M-F") 'sp-forward-symbol)
+;; (define-key smartparens-mode-map (kbd "M-B") 'sp-backward-symbol)
+
+;; (define-key smartparens-mode-map (kbd "C-\"") 'sp-change-inner)
+;; (define-key smartparens-mode-map (kbd "M-i") 'sp-change-enclosing)
+
+;; (bind-key "C-c f" (lambda () (interactive) (sp-beginning-of-sexp 2)) smartparens-mode-map)
+;; (bind-key "C-c b" (lambda () (interactive) (sp-beginning-of-sexp -2)) smartparens-mode-map)
+
+;; (bind-key "C-M-s"
+;;           (defhydra smartparens-hydra ()
+;;             "Smartparens"
+;;             ("d" sp-down-sexp "Down")
+;;             ("e" sp-up-sexp "Up")
+;;             ("u" sp-backward-up-sexp "Up")
+;;             ("a" sp-backward-down-sexp "Down")
+;;             ("f" sp-forward-sexp "Forward")
+;;             ("b" sp-backward-sexp "Backward")
+;;             ("k" sp-kill-sexp "Kill" :color blue)
+;;             ("q" nil "Quit" :color blue))
+;;           smartparens-mode-map)
+
+;; (bind-key "H-t" 'sp-prefix-tag-object smartparens-mode-map)
+;; (bind-key "H-p" 'sp-prefix-pair-object smartparens-mode-map)
+;; (bind-key "H-y" 'sp-prefix-symbol-object smartparens-mode-map)
+;; (bind-key "H-h" 'sp-highlight-current-sexp smartparens-mode-map)
+;; (bind-key "H-e" 'sp-prefix-save-excursion smartparens-mode-map)
+;; (bind-key "H-s c" 'sp-convolute-sexp smartparens-mode-map)
+;; (bind-key "H-s a" 'sp-absorb-sexp smartparens-mode-map)
+;; (bind-key "H-s e" 'sp-emit-sexp smartparens-mode-map)
+;; (bind-key "H-s p" 'sp-add-to-previous-sexp smartparens-mode-map)
+;; (bind-key "H-s n" 'sp-add-to-next-sexp smartparens-mode-map)
+;; (bind-key "H-s j" 'sp-join-sexp smartparens-mode-map)
+;; (bind-key "H-s s" 'sp-split-sexp smartparens-mode-map)
+;; (bind-key "H-s r" 'sp-rewrap-sexp smartparens-mode-map)
+;; (defvar hyp-s-x-map)
+;; (define-prefix-command 'hyp-s-x-map)
+;; (bind-key "H-s x" hyp-s-x-map smartparens-mode-map)
+;; (bind-key "H-s x x" 'sp-extract-before-sexp smartparens-mode-map)
+;; (bind-key "H-s x a" 'sp-extract-after-sexp smartparens-mode-map)
+;; (bind-key "H-s x s" 'sp-swap-enclosing-sexp smartparens-mode-map)
+
+;; (bind-key "C-x C-t" 'sp-transpose-hybrid-sexp smartparens-mode-map)
+
+;; (bind-key ";" 'sp-comment emacs-lisp-mode-map)
+
+;; (bind-key [remap c-electric-backspace] 'sp-backward-delete-char smartparens-strict-mode-map)
+
+;; )
+#+END_SRC
 
 *** TODO undo tree
-*** DONE helpfull
+*** helpfull
 Helpful is a replacement for *help* buffers that provides much more
 contextual information.  To get started, try:
 `M-x helpful-function RET helpful-function
@@ -576,7 +687,7 @@ For more information and screenshots, see
            ))
 
 #+END_SRC
-*** DONE avy (jumping to wisible text)
+*** avy (jumping to wisible text)
 Avy is a GNU Emacs package for jumping to visible text using a char-based decision tree
 [[https://github.com/abo-abo/avy][Avy Github]]
 [[https://www.youtube.com/watch?v=zar4GsOBU0g][Avy YouTube reprezentation]]
@@ -605,7 +716,7 @@ Avy is a GNU Emacs package for jumping to visible text using a char-based decisi
            ;;You add this to your config to bind some stuff:
            ("C-c C-j" . avy-resume)))
 #+END_SRC
-*** DONE amx (prioritizing M-x commands)
+*** amx (prioritizing M-x commands)
 Amx is an alternative interface for M-x in Emacs. It provides several
 enhancements over the ordinary execute-extended-command, such as
 prioritizing your most-used commands in the completion list and
@@ -1096,21 +1207,21 @@ Provides some fuzzy match scoring/matching functions for Emacs, they are powered
 #+NAME: fuz
 #+BEGIN_SRC emacs-lisp
 #+END_SRC
-**** DONE FZF (very fast search fuzzy tool)
+**** FZF (very fast search fuzzy tool)
 An Emacs front-end for [[https://github.com/junegunn/fzf][fzf]]
 [[https://github.com/bling/fzf.el][Fzf Github]]
 #+NAME: fzf
 #+BEGIN_SRC emacs-lisp
 (use-package fzf)
 #+END_SRC
-**** DONE FLX [DEPTRECATE] (fuzzy search functions)
+**** FLX [DEPTRECATE] (fuzzy search functions)
 Fuzzy matching with goog sorting
 [[https://github.com/lewang/flx][Flx Github]]
 #+NAME: flx
 #+BEGIN_SRC emacs-lisp
 (use-package flx)
 #+END_SRC
-**** DONE WGREP (allows to edit and apply changes to a grep buffer)
+**** WGREP (allows to edit and apply changes to a grep buffer)
 wgrep allows you to edit a grep buffer and apply those changes to the file buffer like sed interactively. No need to learn sed script, just learn Emacs.
 [[https://github.com/mhayashi1120/Emacs-wgrep][Wgrep GitHub]]
 #+NAME: wgrep
@@ -1131,13 +1242,59 @@ another incremental search & replace, compatible with “multiple-cursors”
 ;;(use-package phi-replace)
 #+END_SRC
 
+*** region-bindings-mode
+Comfort mode for autobind command for work with region and keeping global bindings clean
+Good idea will be setup this mode together with multiple cursors
+[[https://github.com/fgallina/region-bindings-mode][Region-bindings-mode GitHub]]
+#+NAME: region-bindings-mode
+#+BEGIN_SRC emacs-lisp
+(use-package region-bindings-mode
+  :commands (region-bindings-mode-enable)
+  ;;To think about hooks for program modes
+  :init (region-bindings-mode-enable))
+#+END_SRC
+
 *** multiple-cursors
 Multiple cursors for Emacs. This is some pretty crazy functionality, so yes, there are kinks. Don't be afraid though, I've been using it since 2011 with great success and much merriment.
 [[https://github.com/magnars/multiple-cursors.el][Multiple cursors Github]]
 #+NAME: multi-cursors
 #+BEGIN_SRC emacs-lisp
-(use-package multiple-cursors)
+(use-package multiple-cursors
+  :after (region-bindings-mode)
+  :init (multiple-cursors-mode)
+  :bind 
+  (:map region-bindings-mode-map 
+	(("a" . mc/mark-all-like-this)
+	 ("p" . mc/mark-previous-like-this)
+	 ("n" . mc/mark-next-like-this)
+	 ("m" . mc/mark-more-like-this-extended))))
 #+END_SRC
+*** edit-server
+This provides an edit server to respond to requests from the Chrome
+Emacs Chrome plugin. This is my first attempt at doing something
+with sockets in Emacs. I based it on the following examples:
+[[https://github.com/stsquad/emacs_chrome][Emacs_chrome GitHub]]
+[[http://www.emacswiki.org/emacs/EmacsEchoServer][Emacs_chrome EmacsWiki]]
+[[http://nullprogram.com/blog/2009/05/17/][Emacs_chrome NullProgramm]]
+#+NAME: edit-server
+#+BEGIN_SRC emacs-lisp
+(use-package edit-server
+  :commands edit-server-start
+  :init (if after-init-time
+              (edit-server-start)
+            (add-hook 'after-init-hook
+                      #'(lambda() (edit-server-start))))
+  :config (setq edit-server-new-frame-alist
+                '((name . "Edit with Emacs FRAME")
+                  (top . 300)
+                  (left . 300)
+                  (width . 50)
+                  (height . 15)
+                  (minibuffer . t)
+;;                  (menu-bar-lines . x ;TODO: )
+                  (window-system . x))))
+#+END_SRC
+
 ** packages
 #+NAME: paradox
 #+BEGIN_SRC emacs-lisp
@@ -1155,18 +1312,19 @@ Magit is a complete text-based user interface to Git
 (use-package magit)
 #+END_SRC
 
-*** TODO project management
+*** project management
 **** treemacs
-Здесь сконфигурированы и настроны пакеты позволяющие еффективно управлять проектами
+mЗдесь сконфигурированы и настроны пакеты позволяющие еффективно управлять проектами
+
 #+BEGIN_SRC emacs-lisp
 ;;===================================================================
 ;;TREEMACS
 (use-package treemacs
   :defer t
   :commands (treemacs-follow-mode
-           treemacs-filewatch-mode
-           treemacs-fringe-indicator-mode
-           treemacs-git-mode)
+             treemacs-filewatch-mode
+             treemacs-fringe-indicator-mode
+             treemacs-git-mode)
   :config
   (progn
     (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
@@ -1225,15 +1383,15 @@ Magit is a complete text-based user interface to Git
       (`(t . _)
        (treemacs-git-mode 'simple))))
   :bind (("M-1"       . treemacs-select-window)
-        ("C-x t 1"   . treemacs-delete-other-windows)
-        ("C-x t t"   . treemacs)
-        ("C-x t B"   . treemacs-bookmark)
-        ("C-x t C-t" . treemacs-find-file)
-        ("C-x t M-t" . treemacs-find-tag)
-  (:map treemacs-mode-map
-        ("C-n" . treemacs-next-neighbour)
-        ("C-p" . treemacs-previous-neighbour))))
-   ;;     ([mouse-1] . #'treemacs-single-click-expand-action))
+         ("C-x t 1"   . treemacs-delete-other-windows)
+         ("C-x t t"   . treemacs)
+         ("C-x t B"   . treemacs-bookmark)
+         ("C-x t C-t" . treemacs-find-file)
+         ("C-x t M-t" . treemacs-find-tag)
+	 (:map treemacs-mode-map
+               ("C-n" . treemacs-next-neighbour)
+               ("C-p" . treemacs-previous-neighbour))))
+;;     ([mouse-1] . #'treemacs-single-click-expand-action))
 
 
 
@@ -1266,6 +1424,7 @@ it.  See the README for more details.
 [[https://github.com/bbatsov/projectile][Projectile Github]]
 [[https://docs.projectile.mx/projectile/index.html][User Manual]]
 #+BEGIN_SRC emacs-lisp
+(load (q/get-config-file "projectile-discovery.el"))
 (use-package projectile
   :demand
   :init (projectile-mode +1)
@@ -1273,13 +1432,16 @@ it.  See the README for more details.
   (projectile-complection-system 'ivy)
   (projectile-indexing-method 'hybrid)
   (projectile-sort-order 'recentf)
-
+  (projectile-track-known-projects-automatically nil)
+  (projectile-auto-discover nil)
+  
   :bind (:map projectile-mode-map
 	      ("M-<f1>" . projectile-command-map)
 	      ("C-c p" . projectile-command-map) 
 	      ("M-p" . projectile-command-map))
   :config
   ;;Add paths for autodiscover projects at start
+  
   (setq projectile-project-search-path (list q/projects-directory q/sources-directory)
 	;;Config filteres by next link
 	;;https://gitlab.com/skybert/my-little-friends/blob/master/emacs/.emacs#L603
@@ -1288,28 +1450,12 @@ it.  See the README for more details.
 
 	projectile-globally-ignored-directories
 	(append (list
-                 "build"
-                 "elpa"
-                 "node_modules"
-                 "output"
-                 "target"
-		 "straight"
-		 "venv"
-		 "semanticdb"
-		 "reveal.js"
-		 "__pycache__"
-		 ".pytest_cache")
-                projectile-globally-ignored-directories)))
+		 "build.*" "elpa.*" "node_modules" "output" "target.*" "straight" "repos"
+		 "venv" "semanticdb" "reveal.js" "__pycache__" ".pytest_cache" "cache.*"
+		 "package.*")
+                projectile-globally-ignored-directories)
+	))
 
-
-
-;; :config
-;;  (setq projectile-project-root-files-bottom-up
-;;      '(".git" ".hg" "README.md" "README.org" "README" "pom.xml")
-;;      projectile-project-search-path '(q/projects-directory)
-;;      projectile-sort-order 'access-time))
-;;(projectile-discover-projects-in-directory q/projects-directory)
-;;(projectile-discover-projects-in-directory q/sources-directory))
 #+END_SRC
 ***** Counsel-projectile
 Projectile has native support for using ivy as its completion
@@ -1448,6 +1594,22 @@ SLIME is the Superior Lisp Interaction Mode for Emacs
 #+BEGIN_SRC emacs-lisp
 ;;(use-package slime)
 #+END_SRC
+**** TODO gaiser
+[[https://www.nongnu.org/geiser/][Geiser site]]
+#+NAME: gaiser
+#+BEGIN_SRC emacs-lisp
+;;(use-package geiser)
+  
+#+END_SRC
+*** debug
+**** realgud
+A extensible, modular GNU Emacs front-end for interacting with external debuggers
+[[https://github.com/realgud/realgud/][RealGud Github]]
+[[https://github.com/realgud/realgud/wiki][RealGud Wiki]]
+#+NAME: realgud
+#+BEGIN_SRC emacs-lisp
+(use-package realgud)
+#+END_SRC
 
 ** text
 *** org
@@ -1575,16 +1737,39 @@ Functions to maintain a simple personal diary / journal using in Emacs.
      :bind
      ("C-c j" . org-journal-new-entry))
 #+END_SRC
+**** Ox-pandoc
+[[https://github.com/kawabata/ox-pandoc][Ox-pandoc GitHub]]
+#+NAME: ox-pandoc
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
+*** pandoc-mode
+It is an Emacs mode for interacting with Pandoc. Pandoc is a program (plus libraries) 
+created by John MacFarlane that can convert a text written in one markup language into 
+another markup language.
+[[http://joostkremers.github.io/pandoc-mode/][Pandoc-mode Homepage]]
+#+NAME: pandoc-mode
+#+BEGIN_SRC emacs-lisp
+(use-package pandoc-mode
+  :commands (pandoc-load-default-settings)
+  :hook (pandoc-mode . pandoc-load-default-settings))
+#+END_SRC
 *** markdown-mode
 Режим для чтения и написания документов с разметкой Markdown
+[[https://jblevins.org/projects/markdown-mode/][Markdown-mode Homepage]]
 #+BEGIN_SRC emacs-lisp
-  (use-package markdown-mode
-    :commands (markdown-mode gfm-mode)
-    :mode (("README\\.md\\'" . gfm-mode)
-           ("\\.md\\'" . markdown-mode)
-           ("\\.markdown\\'" . markdown-mode))
-    :hook (markdown-mode . pandoc-mode))
-
+(use-package markdown-mode
+  :after (pandoc-mode)
+  :commands (markdown-mode gfm-mode)
+  :mode 
+  ("README\\.md\\'" . gfm-mode)
+  ("\\.md\\'" . markdown-mode)
+  ("\\.markdown\\'" . markdown-mode)
+  :hook
+  (markdown-mode . pandoc-mode)
+  (gfm-mode . pandoc-mode)
+  :custom
+  (markdown-header-scaling t))
 #+END_SRC
 :init (setq markdown-command "markdown"))
 *** plantuml mode
@@ -1652,7 +1837,7 @@ A company front-end with icons.
   (use-package company-box
     :hook (company-mode . company-box-mode))
 #+END_SRC
-*** DONE ivy
+*** ivy
 **** ivy-base
 Ivy is a generic completion mechanism for Emacs. While it operates similarly to other completion schemes such as icomplete-mode, Ivy aims to be more efficient, smaller, simpler, and smoother to use yet highly customizable.
 [[https://oremacs.com/swiper/][Ivy User Manual]]
@@ -1806,7 +1991,7 @@ This package comes with rich transformers for commands from ivy and counsel. It 
 
 #+END_SRC
 
-** TODO yas
+** yas
 *** yas-base
 Снипеты позволяют по сочетанию клавиш
 либо по ключевому слову запустить построение шаблона
@@ -1815,12 +2000,12 @@ This package comes with rich transformers for commands from ivy and counsel. It 
 [[https://github.com/joaotavora/yasnippet/blob/master/doc/snippet-development.org][Документация]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package yasnippet
-    :after delight
-    :delight (yas-minor-mode "ⓨ")
-    :config  
-    (setq yas-wrap-around-region t)
-    (yas-global-mode))
+(use-package yasnippet
+  :after delight
+  :delight (yas-minor-mode "ⓨ")
+  :config  
+  (setq yas-wrap-around-region t)
+  (yas-global-mode))
 #+End_SRC
 *** yas-snippets
 Official snippet collection for the yasnippet package.
@@ -1886,6 +2071,13 @@ major mode specific key bindings.
 #+NAME: hydra-major-mode
 #+BEGIN_SRC emacs-lisp
 (use-package major-mode-hydra)
+#+END_SRC
+** logging
+#+NAME: command-log-mode
+#+BEGIN_SRC emacs-lisp
+(use-package command-log-mode
+  :custom
+  (command-log-mode-key-binding-open-log "<f12>"))
 #+END_SRC
 ** apperiance
 *** themes
