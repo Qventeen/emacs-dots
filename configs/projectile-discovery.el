@@ -1,4 +1,4 @@
-(require 'projectile)
+;;(require 'projectile)
 (defun q/projectile-discovery-project-recursive (project-dir)
   "Recursively searching projects in directory"
   (when (and (file-directory-p project-dir)

@@ -34,44 +34,44 @@ We set =gc-cons-threshold= to its maximum value, to prevent any garbage collecti
 This module initialize startup package management
 #+NAME: initial package managament system
 #+BEGIN_SRC emacs-lisp
-  ;;Initial Package manager
-  ;;===============================================================
-  (setq package-enable-at-startup nil)
+;;Initial Package manager
+;;===============================================================
+(setq package-enable-at-startup nil)
 
-  ;;Add repositories
-  (setq package-archives
-        '(("elpa" . "https://elpa.gnu.org/packages/")
-          ("melpa" . "https://melpa.org/packages/")))
-
-
-
-  ;;Butstrap setup straight pakcage manager
-  ;;================================================================
-  (defvar bootstrap-version)
-  (defvar straight-process-buffer " *straight-p*")
-  (defvar straight-whatcher-process-buffer " *straight-w*")
-
-  ;;straight fix for flycheck
-  (defvar straight-fix-flycheck t)
-
-  ;;straight fix for org
-  (defvar straight-fix-org t)
-
-  ;;Set stright for work with use-package
-  (defvar straight-use-package-by-default 1)
+;;Add repositories
+(setq package-archives
+      '(("elpa" . "https://elpa.gnu.org/packages/")
+        ("melpa" . "https://melpa.org/packages/")))
 
 
-  (let ((bootstrap-file
-         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-        (bootstrap-version 5))
-    (unless (file-exists-p bootstrap-file)
-      (with-current-buffer
-          (url-retrieve-synchronously
-           "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-           'silent 'inhibit-cookies)
-        (goto-char (point-max))
-        (eval-print-last-sexp)))
-    (load bootstrap-file nil 'nomessage))
+
+;;Butstrap setup straight pakcage manager
+;;================================================================
+(defvar bootstrap-version)
+(defvar straight-process-buffer " *straight-p*")
+(defvar straight-whatcher-process-buffer " *straight-w*")
+
+;;straight fix for flycheck
+(defvar straight-fix-flycheck t)
+
+;;straight fix for org
+(defvar straight-fix-org t)
+
+;;Set stright for work with use-package
+(defvar straight-use-package-by-default 1)
+
+
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
 #+END_SRC
 ** use-package configure
 [[https://github.com/xendk/dotemacs/blob/master/init.el][Solution of problem with flycheck and Straight]]
@@ -129,15 +129,21 @@ many differend parameters. This mode keeps my init file clean
 #+END_SRC
 ** general dependencies
 #+BEGIN_SRC emacs-lisp
-  (require 'cl-lib)
-  (require 'seq)
-  (use-package f :demand t)        ;;files
-  (use-package dash :demand t)     ;;lists
-  (use-package ht :demand t)       ;;hash-tables
-  (use-package s :demand t)        ;;strings
-  (use-package a :demand t)        ;;assotiation lists
-  (use-package anaphora :demand t) ;;anaphora
-  (use-package org :demand t)        ;;org
+(require 'cl-lib)
+(require 'seq)
+(use-package f :demand t)        ;;files
+(use-package dash :demand t)     ;;lists
+(use-package ht :demand t)       ;;hash-tables
+(use-package s :demand t)        ;;strings
+(use-package a :demand t)        ;;assotiation lists
+(use-package anaphora :demand t) ;;anaphora
+(use-package org :demand t)        ;;org
+
+;;very usable package for hydra integration
+;;add integration to use-package
+(use-package pretty-hydra :demand t)     ;;add :pretty-hydra keyword to use-pakcage
+(use-package major-mode-hydra :demand t) ;;add :mode-hydra keyword to use-package
+
 #+END_SRC
 ** local settings (current machine)
 *** linux-paths
@@ -235,7 +241,7 @@ Emacs 27 and onward deprecates the built-in cl library (to be replaced with cl-l
 (add-to-list 'default-frame-alist
 ;;'(font . "Comic Sans MS-14")
 ;;'(font . "Hack-14")
-'(font . "JetBrains Mono-14"))
+'(font . "JetBrains Mono-13"))
 #+END_SRC
 *** display
 **** visual-line-mode
@@ -517,27 +523,18 @@ Is a small Emacs minor mode that mimics the effect of fill-column in visual-line
 Smartparens is minor mode for Emacs that deals with parens pairs
 and tries to be smart about it. 
 [[https://github.com/Fuco1/smartparens][Smartparens Github]]
+[[https://smartparens.readthedocs.io/en/latest/index.html][Smartprens HomePage]]
 **** base
 #+NAME: smartparent
 #+BEGIN_SRC emacs-lisp
 (use-package smartparens
   :config
   (require 'smartparens-config)
-  (progn (show-smartparens-global-mode t))
+  ;;(progn (show-smartparens-global-mode t))
   :hook
-  (prog-mode . turn-on-smartparens-strict-mode)
-  :bind (:map smartparens-mode-map
-	      ("C-M-a" . sp-beginning-of-sexp)
-	      ("C-M-e" . sp-end-of-sexp)
-;;	        ("C-<up>" . sp-up-sexp)
-;;  	        ("C-<down>" . sp-down-sexp)
-;;              ("M-<up>" . sp-backward-up-sexp)
-;;              ("M-<down>" . sp-backward-down-sexp)
-	      ("C-M-f" . sp-forward-sexp)
-	      ("C-M-b" . sp-backward-sexp)
-	      ("C-M-n" . sp-next-sexp)
-	      ("C-M-P" . sp-prev-sexp)
-	      ))
+  (after-init . turn-on-smartparens-mode)
+  (prog-mode . turn-on-smartparens-strict-mode))
+  
 
 #+End_SRC
 
@@ -548,93 +545,106 @@ and tries to be smart about it.
 Experimental test of keybindings. This bindings i taken from emacs init file of developer of smaprparens package
 #+NAME: smartparens-keybindings
 #+BEGIN_SRC emacs-lisp
-;; ;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;; keybinding management
-;; (use-package smartparens
-;; (define-key smartparens-mode-map (kbd "C-M-f") 'sp-forward-sexp)
-;; (define-key smartparens-mode-map (kbd "C-M-b") 'sp-backward-sexp)
+(use-package smartparens
+  ;;Forward sexpr on current level and up
+  :pretty-hydra
+  ((:color red)
+   ("SmallMove"
+    (("f" sp-down-sexp          "DownF")
+     ("b" sp-backward-up-sexp   "UpF")
+     ("u" sp-up-sexp            "UpB")
+     ("d" sp-backward-down-sexp "DownB")
+     ("A" sp-beginning-of-sexp  "Begin")
+     ("E" sp-end-of-sexp        "End"))
 
-;; (define-key smartparens-mode-map (kbd "C-M-d") 'sp-down-sexp)
-;; (define-key smartparens-mode-map (kbd "C-M-a") 'sp-backward-down-sexp)
-;; (define-key smartparens-mode-map (kbd "C-S-d") 'sp-beginning-of-sexp)
-;; (define-key smartparens-mode-map (kbd "C-S-a") 'sp-end-of-sexp)
+    "GreatMove"
+    (("p" beginning-of-defun "Bdefun")
+     ("n" end-of-defun       "Edefun")
+     ("e" sp-forward-sexp    "Forward")
+     ("a" sp-backward-sexp   "Backward")
+     ("t" sp-transpose-sexp  "Transp"))
 
-;; (define-key smartparens-mode-map (kbd "C-M-e") 'sp-up-sexp)
-;; (define-key smartparens-mode-map (kbd "C-M-u") 'sp-backward-up-sexp)
-;; (define-key smartparens-mode-map (kbd "C-M-t") 'sp-transpose-sexp)
+    "Select/Change"
+    (("]" sp-select-next-thing              "SelectN")
+     ("[" sp-select-previous-thing-exchange "SelectP")
+     ("i" sp-change-inner                   "Inner")
+     ("I" sp-change-enclosing               "InnerEncl"))
 
-;; (define-key smartparens-mode-map (kbd "C-M-n") 'sp-forward-hybrid-sexp)
-;; (define-key smartparens-mode-map (kbd "C-M-p") 'sp-backward-hybrid-sexp)
+    "Slurp/Barf"
+    (("<right>" sp-forward-slurp-sexp   "SlurpF")
+     ("<left>" sp-forward-barf-sexp     "BarfF")
+     ("S-<left>" sp-backward-slurp-sexp "SlurpB")
+     ("S-<right>" sp-backward-barf-sexp "BarfF"))
 
-;; (define-key smartparens-mode-map (kbd "C-M-k") 'sp-kill-sexp)
-;; (define-key smartparens-mode-map (kbd "C-M-w") 'sp-copy-sexp)
+    "Kill/Copy/Slice"
+    (("k" sp-kill-sexp "Kill")
+     ("w" sp-copy-sexp "Copy")
+     ("D" sp-splice-sexp "Splice"))
 
-;; (define-key smartparens-mode-map (kbd "M-<delete>") 'sp-unwrap-sexp)
-;; (define-key smartparens-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)
+    "Unwrap/SliceKilling"
+    (("<delete>" sp-unwrap-sexp "UnwrapF")
+     ("<backspace>" sp-backward-unwrap-sexp "UnwrapB")
+     ("M-<delete>" sp-splice-sexp-killing-forward "SpliceKF")
+     ("M-<backspace>" sp-splice-sexp-killing-backward "SpliceKB")
+     ("S-<backspace>" sp-splice-sexp-killing-around "SpliceKAround"))))
 
-;; (define-key smartparens-mode-map (kbd "C-<right>") 'sp-forward-slurp-sexp)
-;; (define-key smartparens-mode-map (kbd "C-<left>") 'sp-forward-barf-sexp)
-;; (define-key smartparens-mode-map (kbd "C-M-<left>") 'sp-backward-slurp-sexp)
-;; (define-key smartparens-mode-map (kbd "C-M-<right>") 'sp-backward-barf-sexp)
+  :bind (:map smartparens-mode-map
+	      (;;Defun begin/end
+	       ("C-M-p" . beginning-of-defun)
+	       ("C-M-n" . end-of-defun)
+	       ;;Forward/backward sexp
+	       ("C-M-e" . sp-forward-sexp)
+	       ("C-M-a" . sp-backward-sexp)
 
-;; (define-key smartparens-mode-map (kbd "M-D") 'sp-splice-sexp)
-;; (define-key smartparens-mode-map (kbd "C-M-<delete>") 'sp-splice-sexp-killing-forward)
-;; (define-key smartparens-mode-map (kbd "C-M-<backspace>") 'sp-splice-sexp-killing-backward)
-;; (define-key smartparens-mode-map (kbd "C-S-<backspace>") 'sp-splice-sexp-killing-around)
+	       ;;Forward down backward up sexpr 
+	       ("C-M-f" . sp-down-sexp)
+	       ("C-M-b" . sp-backward-up-sexp)
 
-;; (define-key smartparens-mode-map (kbd "C-]") 'sp-select-next-thing-exchange)
-;; (define-key smartparens-mode-map (kbd "C-<left_bracket>") 'sp-select-previous-thing)
-;; (define-key smartparens-mode-map (kbd "C-M-]") 'sp-select-next-thing)
+	       ;;Forward up backward down sexpr
+	       ("C-M-u" . sp-up-sexp)
+	       ("C-M-d" . sp-backward-down-sexp)
 
-;; (define-key smartparens-mode-map (kbd "M-F") 'sp-forward-symbol)
-;; (define-key smartparens-mode-map (kbd "M-B") 'sp-backward-symbol)
+	       ;;Beginning and end sexpr (inner sexpr)
+	       ("C-S-a" . sp-beginning-of-sexp)
+	       ("C-S-e" . sp-end-of-sexp)
 
-;; (define-key smartparens-mode-map (kbd "C-\"") 'sp-change-inner)
-;; (define-key smartparens-mode-map (kbd "M-i") 'sp-change-enclosing)
+	       ;;Forward backward symbols
+	       ("M-F" . sp-forward-symbol)
+	       ("M-B" . sp-backward-symbol)
 
-;; (bind-key "C-c f" (lambda () (interactive) (sp-beginning-of-sexp 2)) smartparens-mode-map)
-;; (bind-key "C-c b" (lambda () (interactive) (sp-beginning-of-sexp -2)) smartparens-mode-map)
+	       ;;Trensposer with upper sexpr
+	       ("C-M-t" . sp-transpose-sexp)
 
-;; (bind-key "C-M-s"
-;;           (defhydra smartparens-hydra ()
-;;             "Smartparens"
-;;             ("d" sp-down-sexp "Down")
-;;             ("e" sp-up-sexp "Up")
-;;             ("u" sp-backward-up-sexp "Up")
-;;             ("a" sp-backward-down-sexp "Down")
-;;             ("f" sp-forward-sexp "Forward")
-;;             ("b" sp-backward-sexp "Backward")
-;;             ("k" sp-kill-sexp "Kill" :color blue)
-;;             ("q" nil "Quit" :color blue))
-;;           smartparens-mode-map)
+	       ;;Manipulation of sexp
+	       ;;=================================
+	       ;;Killing
+	       ("C-M-k" . sp-kill-sexp)
+	       ("C-M-w" . sp-copy-sexp)
+	       
+	       ("M-<delete>" . sp-unwrap-sexp)
+	       ("M-<backspace>" . sp-backward-unwrap-sexp)
 
-;; (bind-key "H-t" 'sp-prefix-tag-object smartparens-mode-map)
-;; (bind-key "H-p" 'sp-prefix-pair-object smartparens-mode-map)
-;; (bind-key "H-y" 'sp-prefix-symbol-object smartparens-mode-map)
-;; (bind-key "H-h" 'sp-highlight-current-sexp smartparens-mode-map)
-;; (bind-key "H-e" 'sp-prefix-save-excursion smartparens-mode-map)
-;; (bind-key "H-s c" 'sp-convolute-sexp smartparens-mode-map)
-;; (bind-key "H-s a" 'sp-absorb-sexp smartparens-mode-map)
-;; (bind-key "H-s e" 'sp-emit-sexp smartparens-mode-map)
-;; (bind-key "H-s p" 'sp-add-to-previous-sexp smartparens-mode-map)
-;; (bind-key "H-s n" 'sp-add-to-next-sexp smartparens-mode-map)
-;; (bind-key "H-s j" 'sp-join-sexp smartparens-mode-map)
-;; (bind-key "H-s s" 'sp-split-sexp smartparens-mode-map)
-;; (bind-key "H-s r" 'sp-rewrap-sexp smartparens-mode-map)
-;; (defvar hyp-s-x-map)
-;; (define-prefix-command 'hyp-s-x-map)
-;; (bind-key "H-s x" hyp-s-x-map smartparens-mode-map)
-;; (bind-key "H-s x x" 'sp-extract-before-sexp smartparens-mode-map)
-;; (bind-key "H-s x a" 'sp-extract-after-sexp smartparens-mode-map)
-;; (bind-key "H-s x s" 'sp-swap-enclosing-sexp smartparens-mode-map)
+	       ("M-D" . sp-splice-sexp)
+	       ("C-M-<delete>" . sp-splice-sexp-killing-forward)
+	       ("C-M-<backspace>" . sp-splice-sexp-killing-backward)
+	       ("C-S-<backspace>" . sp-splice-sexp-killing-around)
 
-;; (bind-key "C-x C-t" 'sp-transpose-hybrid-sexp smartparens-mode-map)
+	       ;;Slurp/Barf
+	       ("C-<right>" . sp-forward-slurp-sexp)
+	       ("C-<left>" . sp-forward-barf-sexp)
+	       ("C-M-<left>" . sp-backward-slurp-sexp)
+	       ("C-M-<right>" . sp-backward-barf-sexp)
 
-;; (bind-key ";" 'sp-comment emacs-lisp-mode-map)
+	       ;;Selecting
+	       ("M-]" . sp-select-next-thing)
+	       ("M-[" . sp-select-previous-thing-exchange)
 
-;; (bind-key [remap c-electric-backspace] 'sp-backward-delete-char smartparens-strict-mode-map)
+	       ;;Changing-in
+	       ("C-M-i" . sp-change-inner)
+	       ("M-i" . sp-change-enclosing)
 
-;; )
+	       ;;To hydra
+	       ("H-s" . smartparens-hydra/body))))
 #+END_SRC
 
 *** TODO undo tree
@@ -1145,8 +1155,8 @@ as better scaling of and anti aliasing of the icons.
 **** Treemacs-icons
 #+NAME: treemacs-icons
 #+BEGIN_SRC emacs-lisp
-;;(use-package treemacs-all-the-icons
-;;:after treemacs)
+(use-package treemacs-all-the-icons
+:after treemacs)
 
 #+END_SRC
 **** Treemacs-icons-dired
@@ -1199,6 +1209,11 @@ This package is a peep-dired inspired, dired glimpse package using posframe.
  ;; (use-package dired-posframe
  ;;   :hook (dired-mode . dired-posframe-mode))
 #+END_SRC
+**** TODO Hydra-posframe
+#+NAME: hydra-posframe
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
 
 *** TODO search
 **** TODO FUZ (fuzzy match sortint/matching functions)
@@ -1249,25 +1264,139 @@ Good idea will be setup this mode together with multiple cursors
 #+NAME: region-bindings-mode
 #+BEGIN_SRC emacs-lisp
 (use-package region-bindings-mode
-  :commands (region-bindings-mode-enable)
   ;;To think about hooks for program modes
-  :init (region-bindings-mode-enable))
+  :commands (region-bindings-mode-enable)
+  :init
+  (region-bindings-mode-enable))
 #+END_SRC
-
 *** multiple-cursors
-Multiple cursors for Emacs. This is some pretty crazy functionality, so yes, there are kinks. Don't be afraid though, I've been using it since 2011 with great success and much merriment.
+Multiple cursors for Emacs. This is some pretty crazy functionality, so yes, there are kinks. Don't be afraid though, I've been using it since 2011 with great 
+success and much merriment.
+
 [[https://github.com/magnars/multiple-cursors.el][Multiple cursors Github]]
-#+NAME: multi-cursors
+**** base-mc
+#+BEGIN_SRC emacs-lisp
+(use-package multiple-cursors :demand t)
+#+END_SRC
+**** ace-mc
+#+BEGIN_SRC emacs-lisp
+(use-package ace-mc :after multiple-cursors)
+#+END_SRC
+**** multiple-cursors-bindings
+#+NAME: mutliple-cursors-bindings
+
 #+BEGIN_SRC emacs-lisp
 (use-package multiple-cursors
-  :after (region-bindings-mode)
-  :init (multiple-cursors-mode)
-  :bind 
-  (:map region-bindings-mode-map 
-	(("a" . mc/mark-all-like-this)
-	 ("p" . mc/mark-previous-like-this)
-	 ("n" . mc/mark-next-like-this)
-	 ("m" . mc/mark-more-like-this-extended))))
+  :config     
+  ;;Add hydras
+  (pretty-hydra-define mc-region-hydra
+    (:title "MC regions" :color red :quit-key "q")
+    ("Mark"
+     (("a"  mc/mark-all-like-this "all")
+      ("d"  mc/mark-all-like-this-in-defun "all defun")
+      ("n"  mc/mark-next-like-this "next")
+      ("p"  mc/mark-previous-like-this "previous")
+      ("m"  mc/mark-more-like-this-extended "extend")
+      ("r"  mc/mark-all-in-region "region"))
+
+     "Unmark/Skip"
+     (("N" mc/unmark-next-like-this "N-unmark")
+      ("P" mc/unmark-previous-like-this "P-unmark")
+      ("SPC" mc/skip-to-next-like-this "N-skip")
+      ("S-SPC" mc/skip-to-previous-like-this "P-skip"))
+
+     "Edits"
+     (("c"  mc/edit-lines "lines")
+      ("b"  mc/edit-beginnings-of-lines "beg lines")
+      ("e"  mc/edit-ends-of-lines "end lines"))
+
+     "Special"
+     (("R" set-rectangular-region-anchor "set anchor")
+      ("t" mc/mark-sgml-tag-pair "tag bair")
+      ("i" mc/insert-numbers "insert numbers")
+      ("I" mc/insert-letters "insert letters")
+      ("s" mc/sort-regions "sort")
+      ("S" mc/reverse-regions "reverse"))))
+
+  (pretty-hydra-define mc-symbols-hydra
+   (:title "MC symbols" :color red :quit-key "q")
+   ("Mark"
+    (("a"  mc/mark-all-symbols-like-this "all")
+     ("d"  mc/mark-all-symbols-like-this-in-defun "all defun")
+     ("n"  mc/mark-next-symbol-like-this "next")
+     ("p"  mc/mark-previous-symbol-like-this "previous")
+     ("m"  mc/mark-more-like-this-extended "extend"))
+
+    "Unmark/Skip"
+    (("N" mc/unmark-next-like-this "N-unmark")
+     ("P" mc/unmark-previous-like-this "P-unmark")
+     ("SPC" mc/skip-to-next-like-this "N-skip")
+     ("S-SPC" mc/skip-to-previous-like-this "P-skip"))
+
+    "Special"
+    (("t" mc/mark-sgml-tag-pair "tag bair")
+     ("i" mc/insert-numbers "insert numbers")
+     ("I" mc/insert-letters "insert letters")
+     ("s" mc/sort-regions "sort")
+     ("S" mc/reverse-regions "reverse"))))
+
+  (pretty-hydra-define mc-words-hydra
+    (:title "MC words" :color red :quit-key "q")
+    ("Mark"
+     (("a"  mc/mark-all-words-like-this "all")
+      ("d"  mc/mark-all-words-like-this-in-defun "all defun")
+      ("n"  mc/mark-next-word-like-this "next")
+      ("p"  mc/mark-previous-word-like-this "previous")
+      ("m"  mc/mark-more-like-this-extended "extend"))
+
+     "Unmark/Skip"
+     (("N" mc/unmark-next-like-this "N-unmark")
+      ("P" mc/unmark-previous-like-this "P-unmark")
+      ("SPC" mc/skip-to-next-like-this "N-skip")
+      ("S-SPC" mc/skip-to-previous-like-this "P-skip"))
+
+     "Special"
+     (("t" mc/mark-sgml-tag-pair "tag bair")
+      ("i" mc/insert-numbers "insert numbers")
+      ("I" mc/insert-letters "insert letters")
+      ("s" mc/sort-regions "sort")
+      ("S" mc/reverse-regions "reverse"))))
+
+  :bind
+  ("C-S-<mouse-1>" . mc/add-cursor-on-click)
+  ("H-c" . mc-region-hydra/body)
+  ("H-w" . mc-words-hydra/body)
+  ("H-d" . mc-symbols-hydra/body)
+
+  (:map region-bindings-mode-map
+               ;;Mark one more occurrence
+               ("a" . mc/mark-all-like-this)
+               ("d" . mc/mark-all-like-this-in-defun)
+               ("p" . mc/mark-previous-like-this)
+               ("n" . mc/mark-next-like-this)
+               ("m" . mc/mark-more-like-this-extended)
+	       ("f" . ace-mc-add-multiple-cursors)
+
+               ;;Juggle around with the current cursors
+               ("P" . mc/unmark-previous-like-this)
+               ("N" . mc/unmark-next-like-this)
+               ("SPC" . mc/skip-to-next-like-this)
+               ("S-SPC" . mc/skip-to-previous-like-this)
+
+               ;;Mark many occurrences
+               ("c" . mc/edit-lines)
+               ("e" . mc/edit-ends-of-lines)
+               ("b" . mc/edit-beginnings-of-lines)
+               ("r" . mc/mark-all-in-region)
+
+               ;;Special
+               ("R" . set-rectangular-region-anchor)
+               ("t" . mc/mark-sgml-tag-pair)
+               ("i" . mc/insert-numbers)
+               ("I" . mc/insert-letters)
+               ("s" . mc/sort-regions)
+               ("S" . mc/reverse-regions))
+  )
 #+END_SRC
 *** edit-server
 This provides an edit server to respond to requests from the Chrome
@@ -1314,8 +1443,7 @@ Magit is a complete text-based user interface to Git
 
 *** project management
 **** treemacs
-mЗдесь сконфигурированы и настроны пакеты позволяющие еффективно управлять проектами
-
+Here is a configured packages for project managemant
 #+BEGIN_SRC emacs-lisp
 ;;===================================================================
 ;;TREEMACS
@@ -1346,8 +1474,9 @@ mЗдесь сконфигурированы и настроны пакеты п
           treemacs-missing-project-action        'ask
           treemacs-move-forward-on-expand        nil
           treemacs-no-png-images                 nil
-          treemacs-no-delete-other-windows       t
-          treemacs-project-follow-cleanup        nil
+	  ;;I thing that need delete other window when treemacs open new file
+          treemacs-no-delete-other-windows       nil 
+          treemacs-project-follow-cleanup        t
           treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
           treemacs-position                      'left
           treemacs-read-string-input             'from-child-frame
@@ -1361,21 +1490,23 @@ mЗдесь сконфигурированы и настроны пакеты п
           treemacs-silent-filewatch              nil
           treemacs-silent-refresh                nil
           treemacs-sorting                       'alphabetic-asc
-          treemacs-space-between-root-nodes      t
+          treemacs-space-between-root-nodes      nil
           treemacs-tag-follow-cleanup            t
           treemacs-tag-follow-delay              3.0
           treemacs-user-mode-line-format         nil
           treemacs-user-header-line-format       nil
-          treemacs-width                         25
-          treemacs-workspace-switch-cleanup      nil)
+          treemacs-width                         30
+          treemacs-workspace-switch-cleanup      t)
 
     ;; The default width and height of the icons is 22 pixels. If you are
     ;; using a Hi-DPI display, uncomment this to double the icon size.
     ;;(treemacs-resize-icons 44)
 
+    (treemacs-resize-icons 15)
     (treemacs-follow-mode t)
     (treemacs-filewatch-mode t)
     (treemacs-fringe-indicator-mode 'always)
+    
     (pcase (cons (not (null (executable-find "git")))
                  (not (null treemacs-python-executable)))
       (`(t . t)
@@ -1437,12 +1568,18 @@ it.  See the README for more details.
   
   :bind (:map projectile-mode-map
 	      ("M-<f1>" . projectile-command-map)
-	      ("C-c p" . projectile-command-map) 
-	      ("M-p" . projectile-command-map))
+	      ;;("C-c p" . projectile-command-map) 
+	      ;;("M-p" . projectile-command-map)
+)
   :config
-  ;;Add paths for autodiscover projects at start
-  
+
+
+  ;;Add paths for discover projects
   (setq projectile-project-search-path (list q/projects-directory q/sources-directory)
+	  
+	  projectile-project-root-files-bottom-up
+	  (append (list "README.md" "README.org" "README") projectile-project-root-files-bottom-up)
+
 	;;Config filteres by next link
 	;;https://gitlab.com/skybert/my-little-friends/blob/master/emacs/.emacs#L603
 	projectile-globally-ignored-file-suffixes
@@ -1455,6 +1592,7 @@ it.  See the README for more details.
 		 "package.*")
                 projectile-globally-ignored-directories)
 	))
+
 
 #+END_SRC
 ***** Counsel-projectile
@@ -1504,22 +1642,99 @@ Emacs client/library for the Language Server Protocol
 [[https://github.com/emacs-lsp/lsp-mode][Lsp-mode Github]]
 #+NAME: lsp-mode
 #+BEGIN_SRC emacs-lisp
-  (use-package lsp-mode
-    :hook (lsp-mode . lsp-enable-which-key-integration)
-    :custom (lsp-completion-enable-additional-text-edit nil))
+(use-package lsp-mode
+  :hook
+  (lsp-mode . lsp-enable-which-key-integration)
+  (lsp-mode . lsp-treemacs-generic-mode)
+  :custom
+  (lsp-completion-enable-additional-text-edit nil)
+  (lsp-headerline-breadcrumb-segments '(project file symbols))
+  (lsp-keymap-prefix "H-f")
+  )
 #+END_SRC
 **** lsp-UI
 lsp-ui contains a series of useful UI integrations for lsp-mode, like
 flycheck support and code lenses.
 [[https://github.com/emacs-lsp/lsp-ui][Lsp-ui GitHub]]
+***** base
 #+NAME: lsp-ui
 #+BEGIN_SRC emacs-lisp
-(use-package lsp-ui :commands lsp-ui-mode)
+(use-package lsp-ui
+  :commands lsp-ui-mode)
+#+END_SRC
+***** side-line
+#+NAME: lsp-ui-sideline
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-ui
+  :config
+;;  (setq lsp-ui-sideline-update-mode 'line)
+  :custom
+  (lsp-ui-sideline-show-hover nil)
+  (lsp-ui-sideline-delay 0.3))
+#+END_SRC
+***** peek
+#+NAME: lsp-ui-peek
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-ui
+:bind
+(:map lsp-ui-mode-map
+      ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+      ([remap xref-find-references] . lsp-ui-peek-find-references))
+)
+#+END_SRC
+***** doc
+#+NAME: lsp-ui-doc
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-ui
+  :custom
+  (lsp-ui-doc-delay nil)
+  :config
+  (setq lsp-ui-doc-position 'top)
+  (setq lsp-ui-doc-alignment 'window)
+
+  ;;Custom function
+  (defun q/lsp-ui-doc-show ()
+    (interactive)
+    (lsp-ui-doc-show)
+    (lsp-ui-doc-focus-frame))
+  (defun q/lsp-ui-doc-hide ()
+    (interactive)
+    (lsp-ui-doc-unfocus-frame)
+    (lsp-ui-doc-hide))
+  
+
+
+  :bind
+  (:map lsp-ui-doc-mode-map
+	("M-q" . q/lsp-ui-doc-show))
+  
+  (:map lsp-ui-doc-frame-mode-map
+	("q" . q/lsp-ui-doc-hide)
+        ("g" . q/lsp-ui-doc-hide)
+	("n" . next-line)
+	("p" . previous-line)
+	("j" . next-line)
+	("k" . previous-line)))
 #+END_SRC
 **** lsp-java
 #+NAME: lsp-java
 #+BEGIN_SRC emacs-lisp
-(use-package lsp-java :hook (java-mode . lsp))
+(use-package lsp-java
+  :hook
+  (java-mode . lsp)
+  (java-mode . lsp-java-lens-mode)
+  :custom
+  ;; Don't organise imports on save
+  (lsp-java-save-action-organize-imports nil)
+
+  ;; Fetch less results from the Eclipse server
+  (lsp-java-completion-max-results 20)
+
+  ;; Currently (2019-04-24), dap-mode works best with Oracle
+  ;; JDK, see https://github.com/emacs-lsp/dap-mode/issues/31
+  ;;
+  ;; lsp-java-java-path "~/.emacs.d/oracle-jdk-12.0.1/bin/java"
+  (lsp-java-java-path "/usr/lib/jvm/java-11-openjdk/bin/java"))
 #+END_SRC
 **** ivy-lsp
 This package provides an interactive ivy interface to the workspace symbol
@@ -1546,7 +1761,31 @@ functionality offered by lsp-mode.
 [[https://github.com/emacs-lsp/lsp-treemacs][LSP treemacs Github]]
 #+NAME: treemacs-lsp
 #+BEGIN_SRC emacs-lisp
-(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+(use-package lsp-treemacs
+  :after lsp-mode
+  :commands lsp-treemacs-errors-list
+  :config
+  (lsp-treemacs-sync-mode 1)
+
+  :bind
+  (:map lsp-treemacs-generic-map
+        ("M-2 o" . lsp-treemacs-open-file)
+	("M-2 e" . lsp-treemacs-open-error)
+	("M-2 h" . lsp-treemacs-call-hierarchy)
+	("M-2 s" . lsp-treemacs-symbols)
+	("M-2 r" . lsp-treemacs-references)
+	("M-2 l" . lsp-treemacs-errors-list)
+        ("M-2 a" . lsp-treemacs-perform-ret-actions)
+	("M-2 f" . lsp-treemacs-quick-fix)
+	("M-2 g" . lsp-treemacs-goto-symbol)
+	("M-2 t" . lsp-treemacs-type-hierarcy)
+	("M-2 i" . lsp-treemacs-implementations)
+
+	("M-3 l" . lsp-treemacs-java-deps-list)
+	("M-3 f" . lsp-treemacs-java-deps-follow)
+	("M-3 r" . lsp-treemacs-java-deps-refresh)
+	)
+  )
 #+END_SRC
 **** flycheck
 Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs,
@@ -1559,22 +1798,23 @@ list.
 
 #+NAME: flycheck
 #+BEGIN_SRC emacs-lisp
-  (use-package flycheck
-    :init
-    (add-to-list 'display-buffer-alist
-                 `(,(rx bos "*Flycheck errors*" eos)
-                   (display-buffer-reuse-window
-                    display-buffer-in-side-window)
-                   (side            . bottom)
-                   (reusable-frames . visible)
-                   (window-height   . 0.15)))
-    :hook 
-    (after-init . global-flycheck-mode)
+(use-package flycheck
+  :init
+  (add-to-list 'display-buffer-alist
+               `(,(rx bos "*Flycheck errors*" eos)
+                 (display-buffer-reuse-window
+                  display-buffer-in-side-window)
+                 (side            . bottom)
+                 (reusable-frames . visible)
+                 (window-height   . 0.15)))
+  :hook 
+  (prog-mode . flycheck-mode)
 
-    :custom
-    (flycheck-emacs-lisp-load-path 'inherit)
-    ;;  (flycheck-emacs-lisp-load-path ())
-    (flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
+  :custom
+  (flycheck-emacs-lisp-load-path 'inherit)
+  ;;  (flycheck-emacs-lisp-load-path ())
+  (flycheck-disabled-checkers '(emacs-lisp-checkdoc))
+  (flycheck-keymap-prefix (kbd "M-4"))) ;;flycheck prefix for quickly work with code check
 #+END_SRC
 **** dap (debug adapter protocol)
 ***** Dap-mode
@@ -1601,6 +1841,31 @@ SLIME is the Superior Lisp Interaction Mode for Emacs
 ;;(use-package geiser)
   
 #+END_SRC
+*** web
+**** web-mode
+[[https://web-mode.org/][Web-mode HomePage]]
+[[https://github.com/fxbois/web-mode][Web-mode GitHub]]
+#+NAME: web-mode
+#+BEGIN_SRC emacs-lisp
+(use-package web-mode
+  :mode
+  ("\\.phtml\\'" . web-mode)
+  ("\\.tpl\\.php\\'" . web-mode)
+  ("\\.[agj]sp\\'" . web-mode)
+  ("\\.as[cp]x\\'" . web-mode)
+  ("\\.erb\\'" . web-mode)
+  ("\\.mustache\\'" . web-mode)
+  ("\\.djhtml\\'" . web-mode)
+  ("\\.html?\\'" . web-mode))
+#+END_SRC
+This is an emacs major mode for editing web templates aka HTML files
+embedding parts (CSS/JavaScript) and blocks (pre rendered by client/server side
+engines).
+
+This is compatible with many template engines: PHP, JSP, ASP, Django,
+Twig, Jinja, Mustache, ERB, FreeMarker, Velocity, Cheetah, Smarty, CTemplate,
+Mustache, Blade, ErlyDTL, Go Template, Dust.js, Google Closure (soy),
+React/JSX, Angularjs, ejs, Nunjucks, etc.
 *** debug
 **** realgud
 A extensible, modular GNU Emacs front-end for interacting with external debuggers
@@ -1609,6 +1874,13 @@ A extensible, modular GNU Emacs front-end for interacting with external debugger
 #+NAME: realgud
 #+BEGIN_SRC emacs-lisp
 (use-package realgud)
+#+END_SRC
+*** compilation
+**** compilation-mode
+;; Convert shell escapes to  color
+#+BEGIN_SRC emacs-lisp
+(add-hook 'compilation-filter-hook
+          (lambda () (ansi-color-apply-on-region (point-min) (point-max))))
 #+END_SRC
 
 ** text
@@ -1662,7 +1934,7 @@ Fix some issues with straight.el and org until that is resolved.
   :bind (("C-c l" . org-store-link))        ;;Following or set links
 
   ;;Unset unneeded default keybindings
-  :hook (org-mode . (lambda () (local-unset-key (kbd "C-'"))))
+  ;;:hook (org-mode . (lambda () (local-unset-key ("C-'"))))
   :hook (org-babel-after-execute . q/org-open-at-point)
 
   :custom
@@ -2064,13 +2336,34 @@ For this package is many diferrent cool underline tools as Major-mode-hydra
 ;;(use-package hydra)
 #+END_SRC
 **** Major-mode-hydra
+***** base
 Inspired by Spacemacs major mode leader key and based on the
 awesome hydra, this package offers a better way to manage your
 major mode specific key bindings.
 [[https://github.com/jerrypnz/major-mode-hydra.el][Major-mode-hydra Github]]
 #+NAME: hydra-major-mode
 #+BEGIN_SRC emacs-lisp
-(use-package major-mode-hydra)
+(use-package major-mode-hydra
+:bind ("M-SPC" . major-mode-hydra))
+#+END_SRC
+***** COMMENT elisp
+#+BEGIN_SRC emacs-lisp
+(major-mode-hydra-define emacs-lisp-mode (:quit-key "q")
+  ("Eval"
+   (("b" eval-buffer "buffer")
+    ("e" eval-defun "defun")
+    ("r" eval-region "region"))
+   "REPL"
+   (("I" ielm "ielm"))
+   "Test"
+   (("t" ert "prompt")
+    ("T" (ert t) "all")
+    ("F" (ert :failed) "failed"))
+   "Doc"
+   (("d" describe-foo-at-point "thing-at-pt")
+    ("f" counsel-describe-function "function")
+    ("v" counsel-describe-variable "variable")
+    ("i" info-lookup-symbol "info lookup"))))
 #+END_SRC
 ** logging
 #+NAME: command-log-mode
