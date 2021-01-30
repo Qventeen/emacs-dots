@@ -259,16 +259,16 @@
 
 ;;  (electric-pair-mode 1)
 
-;; (use-package paren
-;;   :commands (show-paren-mode)
-;;   :hook (after-init . show-paren-mode)
-;;   :custom
-;;   (show-paren-delay 0)
-;;   :config
-;;   (set-face-foreground 'show-paren-match "green4")
-;;   (set-face-foreground 'show-paren-mismatch "#f00")
-;;   (set-face-attribute 'show-paren-match nil :weight 'extra-bold)
-;;   (set-face-attribute 'show-paren-mismatch nil :weight 'extra-bold))
+(use-package paren
+  :commands (show-paren-mode)
+  :hook (after-init . show-paren-mode)
+  :custom
+  (show-paren-delay 0)
+  :config
+  (set-face-foreground 'show-paren-match "green4")
+  (set-face-foreground 'show-paren-mismatch "#f00")
+  (set-face-attribute 'show-paren-match nil :weight 'extra-bold)
+  (set-face-attribute 'show-paren-mismatch nil :weight 'extra-bold))
 
 
 
@@ -1014,6 +1014,15 @@
 
 (use-package magit)
 
+;;Taken this config from https://protesilaos.
+(use-package ediff
+  :config
+  (setq ediff-keep-variants nil)
+  (setq ediff-make-buffers-readonly-at-startup t)
+  (setq ediff-show-clashes-only nil) ;;all regions or only differences
+  (setq ediff-split-window-function 'split-window-horizontally)
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain))
+
 ;;===================================================================
 ;;TREEMACS
 (use-package treemacs
@@ -1308,6 +1317,9 @@
   ("\\.html?\\'" . web-mode))
 
 (use-package realgud)
+
+(add-hook 'compilation-filter-hook
+          (lambda () (ansi-color-apply-on-region (point-min) (point-max))))
 
 ;; (defun fix-org-git-version ()
 ;;   "The Git version of org-mode.
@@ -1647,14 +1659,22 @@
 ;;EMACS THEMES
 ;;===============================================================
 (use-package doom-themes 
-:init (load-theme 'doom-dracula t))
+:init
+;; (load-theme 'doom-dracula t)
+(load-theme 'doom-dark+ t)
+;;(load-theme 'doom-zenburn t)
+)
 
 (use-package rainbow-mode
-  :init (rainbow-mode 1))
+  :commands (rainbow-mode)
+  :config
+  ;;devfine global minor mode from simple minor mode
+  (define-globalized-minor-mode q/global-rainbow-mode rainbow-mode
+    (lambda () (rainbow-mode +1)))
+  (q/global-rainbow-mode))
 
 ;; Functions for random set color for
 ;;=====================================================================================
-(require 'color)
 (defun gen-col-list (length s v &optional hval)
   (cl-flet ( (random-float () (/ (random 10000000000) 10000000000.0))
           (mod-float (f) (- f (ffloor f))) )
@@ -1700,6 +1720,64 @@
  (set-random-rainbow-colors 0.6 0.7 0.5)
   :hook
   (prog-mode . rainbow-delimiters-mode))
+
+;;Taken this config from https://protesilaos.
+(use-package ediff
+  :config
+  ;;color-darken-name
+  ;;color-lighten-name
+  ;;color-saturate-name
+  ;;color-desaturate-name
+  (set-face-background 'ediff-current-diff-A
+		       (color-desaturate-name (color-darken-name "orange" 35) 70))
+  (set-face-background 'ediff-current-diff-B
+		       (color-desaturate-name (color-darken-name "green" 35) 70))
+  (set-face-background 'ediff-current-diff-C
+		       (color-desaturate-name (color-darken-name "yellow" 35) 70))
+  (set-face-background 'ediff-fine-diff-Ancestor
+		       (color-desaturate-name (color-darken-name "blue" 35) 70))
+
+  (set-face-background 'ediff-fine-diff-A
+		       (color-desaturate-name (color-darken-name "orange" 30) 80))
+  ;; (set-face-foreground 'ediff-fine-diff-A
+		       ;; (color-desaturate-name (color-darken-name "orange" 15) 30))
+  (set-face-attribute 'ediff-fine-diff-A nil
+		      :weight 'bold)
+
+  (set-face-background 'ediff-fine-diff-B
+		       (color-desaturate-name (color-darken-name "green" 30) 80))
+  ;; (set-face-foreground 'ediff-fine-diff-B
+		       ;; (color-desaturate-name (color-darken-name "green" 15) 30))
+  (set-face-attribute 'ediff-fine-diff-A nil
+		      :weight 'bold)
+
+  (set-face-background 'ediff-fine-diff-C
+		       (color-desaturate-name (color-darken-name "yellow" 30) 80))
+  ;; (set-face-foreground 'ediff-fine-diff-C
+		       ;; (color-desaturate-name (color-darken-name "yellow" 15) 30))
+  (set-face-attribute 'ediff-fine-diff-A nil
+		      :weight 'bold)
+
+  (set-face-background 'ediff-fine-diff-Ancestor
+		       (color-desaturate-name (color-darken-name "blue" 30) 80))
+  ;; (set-face-foreground 'ediff-fine-diff-Ancestor
+		       ;; (color-desaturate-name (color-darken-name "blue" 15) 30))
+  (set-face-attribute 'ediff-fine-diff-Ancestor nil
+		      :weight 'bold)
+  )
+
+;; (color-desaturate-name (color-darken-name "orange" 42) 0)
+;; (color-desaturate-name (color-darken-name "green" 42) 0)
+;; (color-desaturate-name (color-darken-name "yellow" 42) 0)
+;; (color-desaturate-name (color-darken-name "blue" 30) 60)
+;; (color-desaturate-name (color-darken-name "orange" 30) 60)
+;; (color-desaturate-name (color-darken-name "orange" 30) 60)
+;; (color-desaturate-name (color-darken-name "green" 30) 60)
+;; (color-desaturate-name (color-darken-name "green" 30) 60)
+;; (color-desaturate-name (color-darken-name "yellow" 30) 60)
+;; (color-desaturate-name (color-darken-name "yellow" 30) 60)
+;; (color-desaturate-name (color-darken-name "blue" 30) 60)
+;; (color-desaturate-name (color-darken-name "blue" 30) 60)
 
 (use-package dashboard
   :config
