@@ -145,6 +145,8 @@
 (defvar q/autosaves-directory (concat q/data-directory "autosaves/") "Main bookmarks file-name")
 (defvar q/backups-directory (concat q/data-directory "backups/") "Main bookmarks file-name")
 
+(customize-set-variable 'browse-url-browser-function  'browse-url-chromium)
+
 (setq byte-compile-warnings '(cl-functions))
 
 ;;Отключить менюшки
@@ -166,7 +168,8 @@
 ;;'(font . "Hack-14")
 '(font . "JetBrains Mono-13"))
 
-(global-visual-line-mode 1)
+;;(global-visual-line-mode 1)
+(add-hook 'text-mode-hook '(lambda () (visual-line-mode 1)))
 
 ;; Longer whitespace, otherwise syntax highlighting is limited to default column
 (setq whitespace-line-column 500)
@@ -1012,7 +1015,11 @@
 
 (use-package paradox)
 
-(use-package magit)
+(use-package magit
+  :bind
+  ("M-9" . magit-status)
+  ("C-x g" . magit-status)
+  )
 
 ;;Taken this config from https://protesilaos.
 (use-package ediff
@@ -1174,11 +1181,37 @@
 (use-package lsp-mode
   :hook
   (lsp-mode . lsp-enable-which-key-integration)
-  (lsp-mode . lsp-treemacs-generic-mode)
+  (lsp-mode . lsp-lens-mode)
+  (yaml-mode . lsp-deferred)
+  (web-mode . lsp-deferred)
+;;  (lsp-mode . lsp-treemacs-generic-mode)
   :custom
   (lsp-completion-enable-additional-text-edit nil)
   (lsp-headerline-breadcrumb-segments '(project file symbols))
   (lsp-keymap-prefix "H-f")
+  (lsp-print-io t)
+  (lsp-pring-performance nil)
+  (lsp-server-trace "verbose")
+
+  ;;(lsp-enable-snippet t) ;;default
+  ;;(lsp-auto-guess-root nil) ;;default
+  ;;(lsp-eldoc-render-all nil) ;;default
+  ;;(lsp-diagnostics-provider :auto) ;;default flaycheck or fallback to flymake
+  ;;(lsp-enable-file-watchers t) ;;default
+  ;;(lsp-semantic-tokens-enable nil) ;;default
+
+  :bind
+  (:map lsp-mode-map
+	("M-<insert>" . lsp-execute-code-action)))
+
+(use-package lsp-mode
+  :custom
+  (lsp-xml-format-enabled nil))
+
+(use-package lsp-mode
+  :config
+  (setq lsp-groovy-server-file "~/git/groovy-language-server/build/libs/groovy-language-server-all.jar")
+  ;;(setq lsp-groovy-classpath ["/usr/share/groovy/lib"])
   )
 
 (use-package lsp-ui
@@ -1186,10 +1219,14 @@
 
 (use-package lsp-ui
   :config
-;;  (setq lsp-ui-sideline-update-mode 'line)
+  ;;  (setq lsp-ui-sideline-update-mode 'line)
   :custom
   (lsp-ui-sideline-show-hover nil)
-  (lsp-ui-sideline-delay 0.3))
+  (lsp-ui-sideline-ignore-dublicate t)
+  (lsp-ui-sideline-delay 0.5)
+  :bind (:map lsp-ui-mode-map
+	      ("M-RET" . lsp-ui-sideline-apply-code-actions)
+	      ("M-2 m" . lsp-ui-imenu)))
 
 (use-package lsp-ui
 :bind
@@ -1204,6 +1241,15 @@
   :config
   (setq lsp-ui-doc-position 'top)
   (setq lsp-ui-doc-alignment 'window)
+  (setq lsp-ui-doc-max-width 65)
+  (setq lsp-ui-doc-max-height 15)
+  (setq lsp-ui-doc)
+  (setq lsp-ui-doc-include-signature t)
+
+;;  (defun q/test-fun (content)
+;;    "Hello!")
+
+;;  (setq lsp-ui-doc-render-function #'q/test-fun)
 
   ;;Custom function
   (defun q/lsp-ui-doc-show ()
@@ -1215,68 +1261,68 @@
     (lsp-ui-doc-unfocus-frame)
     (lsp-ui-doc-hide))
   
-
-
   :bind
   (:map lsp-ui-doc-mode-map
 	("M-q" . q/lsp-ui-doc-show))
   
   (:map lsp-ui-doc-frame-mode-map
 	("q" . q/lsp-ui-doc-hide)
-        ("g" . q/lsp-ui-doc-hide)
+        ("C-g" . q/lsp-ui-doc-hide)
 	("n" . next-line)
 	("p" . previous-line)
 	("j" . next-line)
 	("k" . previous-line)))
 
 (use-package lsp-java
+  :init
+  ;;(setenv "JAVA_HOME" "/usr/lib/jvm/java-11-openjdk/")
+  (setenv "JAVA_HOME" "/usr/lib/jvm/default/")
   :hook
-  (java-mode . lsp)
   (java-mode . lsp-java-lens-mode)
+  (java-mode . lsp-jt-lens-mode)
+  ;;(java-mode . lsp-java-boot-lens-mode)
+  
+  (java-mode . lsp)
+  
+
   :custom
   ;; Don't organise imports on save
   (lsp-java-save-action-organize-imports nil)
 
   ;; Fetch less results from the Eclipse server
-  (lsp-java-completion-max-results 20)
+  (lsp-java-completion-max-results 30)
 
   ;; Currently (2019-04-24), dap-mode works best with Oracle
   ;; JDK, see https://github.com/emacs-lsp/dap-mode/issues/31
   ;;
   ;; lsp-java-java-path "~/.emacs.d/oracle-jdk-12.0.1/bin/java"
-  (lsp-java-java-path "/usr/lib/jvm/java-11-openjdk/bin/java"))
+  ;;(lsp-java-java-path "/usr/lib/jvm/java-11-openjdk/bin/java")
+  (lsp-java-java-path "/usr/lib/jvm/default/bin/java")
+
+  ;;===============================================================
+  ;;Additionals
+  (lsp-java-pop-buffer-function 'company-box-doc-manually)
+  (lsp-java-maven-download-sources t)
+  )
 
 (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
-
-;;(use-package helm 
-;;:config (helm-mode))
-
-;;(use-package helm-lsp)
 
 (use-package lsp-treemacs
   :after lsp-mode
   :commands lsp-treemacs-errors-list
+  :init
+  (global-unset-key (kbd "M-2"))
   :config
   (lsp-treemacs-sync-mode 1)
-
   :bind
-  (:map lsp-treemacs-generic-map
-        ("M-2 o" . lsp-treemacs-open-file)
-	("M-2 e" . lsp-treemacs-open-error)
-	("M-2 h" . lsp-treemacs-call-hierarchy)
-	("M-2 s" . lsp-treemacs-symbols)
-	("M-2 r" . lsp-treemacs-references)
-	("M-2 l" . lsp-treemacs-errors-list)
-        ("M-2 a" . lsp-treemacs-perform-ret-actions)
-	("M-2 f" . lsp-treemacs-quick-fix)
-	("M-2 g" . lsp-treemacs-goto-symbol)
-	("M-2 t" . lsp-treemacs-type-hierarcy)
-	("M-2 i" . lsp-treemacs-implementations)
-
-	("M-3 l" . lsp-treemacs-java-deps-list)
-	("M-3 f" . lsp-treemacs-java-deps-follow)
-	("M-3 r" . lsp-treemacs-java-deps-refresh)
-	)
+  ("M-2 h" . lsp-treemacs-call-hierarchy)
+  ("M-2 s" . lsp-treemacs-symbols)
+  ("M-2 r" . lsp-treemacs-references)
+  ("M-2 e" . lsp-treemacs-errors-list)
+  ("M-2 i" . lsp-treemacs-implementations)
+  ("M-2 l" . lsp-treemacs-java-deps-list)
+  ;; ("M-2 f" . lsp-treemacs-java-deps-follow)
+  ;;("M-2 g" . lsp-treemacs-java-deps-refresh)
   )
 
 (use-package flycheck
@@ -1305,6 +1351,11 @@
 
 ;;(use-package geiser)
 
+(use-package groovy-mode
+  :custom (groovysh "/usr/bin/groovysh"))
+
+(use-package grails-mode)
+
 (use-package web-mode
   :mode
   ("\\.phtml\\'" . web-mode)
@@ -1314,9 +1365,17 @@
   ("\\.erb\\'" . web-mode)
   ("\\.mustache\\'" . web-mode)
   ("\\.djhtml\\'" . web-mode)
-  ("\\.html?\\'" . web-mode))
+  ("\\.html?\\'" . web-mode)
+  ;;xml group
+  ("\\.svgz?\\'" . web-mode)
+  ("\\x[ms]l\\'" . web-mode)
+  ("\\.dbk\\'" . web-mode)
+  )
 
 (use-package realgud)
+
+(use-package yaml-mode
+  :mode ("\\.yml\\'" . yaml-mode))
 
 (add-hook 'compilation-filter-hook
           (lambda () (ansi-color-apply-on-region (point-min) (point-max))))
@@ -1430,18 +1489,18 @@
   :commands (pandoc-load-default-settings)
   :hook (pandoc-mode . pandoc-load-default-settings))
 
-(use-package markdown-mode
-  :after (pandoc-mode)
-  :commands (markdown-mode gfm-mode)
-  :mode 
-  ("README\\.md\\'" . gfm-mode)
-  ("\\.md\\'" . markdown-mode)
-  ("\\.markdown\\'" . markdown-mode)
-  :hook
-  (markdown-mode . pandoc-mode)
-  (gfm-mode . pandoc-mode)
-  :custom
-  (markdown-header-scaling t))
+;;(use-package markdown-mode
+;;  :after (pandoc-mode)
+;;  :commands (markdown-mode gfm-mode)
+;;  :mode 
+  ;;("README\\.md\\'" . gfm-mode)
+;;  ("\\.md\\'" . markdown-mode)
+;;  ("\\.markdown\\'" . markdown-mode)
+;;  :hook
+  ;;(markdown-mode . pandoc-mode)
+  ;;(gfm-mode . pandoc-mode)
+;;  :custom
+;;  (markdown-header-scaling t))
 
 (use-package plantuml-mode
   :after (org)
@@ -1473,6 +1532,8 @@
    'org-babel-load-languages
    '((plantuml . t))))
 
+(use-package logview)
+
 (use-package company
   :diminish 
 
@@ -1483,18 +1544,31 @@
   :bind
   (:map
    company-active-map
-   ("M-n" . company-select-next)
-   ("M-p" . company-select-previous))
+   ("C" . company-select-next)
+   ("C-p" . company-select-previous))
 
 
   :config
   (setq company-minimum-prefix-length 1)
   (setq company-tooltip-limit 7)
-  (setq company-show-numbers nil)
-  (setq company-tooltip-idle-delay 0.3))
+  (setq company-show-numbers t)
+  (setq company-tooltip-idle-delay 0.0)
+  )
 
 (use-package company-box
-  :hook (company-mode . company-box-mode))
+  :hook (company-mode . company-box-mode)
+  :config
+  (setq company-box--bottom t)
+  (add-to-list 'company-box-icons-functions '(lambda (candidate) " ") t)
+  :custom
+  (company-box-doc-enable nil)
+  (company-box-scrolbar nil)
+  
+  :bind
+  (:map company-active-map
+	("M-q" . company-box-doc-manually)
+	)
+  )
 
 (use-package ivy
     :demand
@@ -1659,9 +1733,9 @@
 ;;EMACS THEMES
 ;;===============================================================
 (use-package doom-themes 
-:init
-;; (load-theme 'doom-dracula t)
-(load-theme 'doom-dark+ t)
+:config
+(load-theme 'doom-dracula t)
+;;(load-theme 'doom-dark+ t)
 ;;(load-theme 'doom-zenburn t)
 )
 
@@ -1729,41 +1803,41 @@
   ;;color-saturate-name
   ;;color-desaturate-name
   (set-face-background 'ediff-current-diff-A
-		       (color-desaturate-name (color-darken-name "orange" 35) 70))
+		       (color-desaturate-name (color-darken-name "orange" 25) 90))
   (set-face-background 'ediff-current-diff-B
-		       (color-desaturate-name (color-darken-name "green" 35) 70))
+		       (color-desaturate-name (color-darken-name "green" 25) 90))
   (set-face-background 'ediff-current-diff-C
-		       (color-desaturate-name (color-darken-name "yellow" 35) 70))
+		       (color-desaturate-name (color-darken-name "yellow" 25) 90))
   (set-face-background 'ediff-fine-diff-Ancestor
-		       (color-desaturate-name (color-darken-name "blue" 35) 70))
+		       (color-desaturate-name (color-darken-name "blue" 25) 90))
 
   (set-face-background 'ediff-fine-diff-A
-		       (color-desaturate-name (color-darken-name "orange" 30) 80))
-  ;; (set-face-foreground 'ediff-fine-diff-A
-		       ;; (color-desaturate-name (color-darken-name "orange" 15) 30))
+		       (color-desaturate-name (color-darken-name "orange" 20) 90))
+  (set-face-foreground 'ediff-fine-diff-A
+		       (color-desaturate-name (color-darken-name "orange" 5) 10))
   (set-face-attribute 'ediff-fine-diff-A nil
-		      :weight 'bold)
+		      :weight 'normal :slant 'italic)
 
   (set-face-background 'ediff-fine-diff-B
-		       (color-desaturate-name (color-darken-name "green" 30) 80))
-  ;; (set-face-foreground 'ediff-fine-diff-B
-		       ;; (color-desaturate-name (color-darken-name "green" 15) 30))
+		       (color-desaturate-name (color-darken-name "green" 20) 90))
+  (set-face-foreground 'ediff-fine-diff-B
+		       (color-desaturate-name (color-darken-name "green" 5) 10))
   (set-face-attribute 'ediff-fine-diff-A nil
-		      :weight 'bold)
+		      :weight 'normal :slant 'italic)
 
   (set-face-background 'ediff-fine-diff-C
-		       (color-desaturate-name (color-darken-name "yellow" 30) 80))
-  ;; (set-face-foreground 'ediff-fine-diff-C
-		       ;; (color-desaturate-name (color-darken-name "yellow" 15) 30))
+		       (color-desaturate-name (color-darken-name "yellow" 20) 90))
+  (set-face-foreground 'ediff-fine-diff-C
+		       (color-desaturate-name (color-darken-name "yellow" 5) 10))
   (set-face-attribute 'ediff-fine-diff-A nil
-		      :weight 'bold)
+		      :weight 'normal :slant 'italic)
 
   (set-face-background 'ediff-fine-diff-Ancestor
-		       (color-desaturate-name (color-darken-name "blue" 30) 80))
-  ;; (set-face-foreground 'ediff-fine-diff-Ancestor
-		       ;; (color-desaturate-name (color-darken-name "blue" 15) 30))
+		       (color-desaturate-name (color-darken-name "blue" 20) 90))
+  (set-face-foreground 'ediff-fine-diff-Ancestor
+		       (color-desaturate-name (color-darken-name "blue" 5) 10))
   (set-face-attribute 'ediff-fine-diff-Ancestor nil
-		      :weight 'bold)
+		      :weight 'normal :slant 'italic)
   )
 
 ;; (color-desaturate-name (color-darken-name "orange" 42) 0)
@@ -1778,9 +1852,5 @@
 ;; (color-desaturate-name (color-darken-name "yellow" 30) 60)
 ;; (color-desaturate-name (color-darken-name "blue" 30) 60)
 ;; (color-desaturate-name (color-darken-name "blue" 30) 60)
-
-(use-package dashboard
-  :config
-  (dashboard-setup-startup-hook))
 
 (setq gc-cons-threshold (* 2 1000 1000))
