@@ -253,7 +253,7 @@ This mode haw little performance. Instead i use visual-fill-mode
 #+NAME: global-visual-mode
 #+BEGIN_SRC emacs-lisp
 ;;(global-visual-line-mode 1)
-(add-hook 'text-mode-hook '(lambda () (visual-line-mode 1)))
+;;(add-hook 'text-mode-hook '(lambda () (visual-line-mode 1)))
 #+END_SRC
 **** useless whitespace
 #+NAME: whitespace-line-column
@@ -1457,8 +1457,18 @@ Built in package for diffing and merging files
   (setq ediff-keep-variants nil)
   (setq ediff-make-buffers-readonly-at-startup t)
   (setq ediff-show-clashes-only nil) ;;all regions or only differences
-  (setq ediff-split-window-function 'split-window-horizontally)
-  (setq ediff-window-setup-function 'ediff-setup-windows-plain))
+  ;; (setq ediff-split-window-function 'split-window-horizontally)
+  (setq ediff-split-window-function 'split-window-vertically)
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+
+  ;;disable question for close ediff session
+  (defun disable-y-or-n-p (orig-fun &rest args)
+    (cl-letf (((symbol-function 'y-or-n-p) (lambda (prompt) t)))
+      (apply orig-fun args)))
+  (advice-add 'ediff-quit :around #'disable-y-or-n-p)
+
+  )
+
 #+END_SRC
 *** project management
 **** treemacs
@@ -1652,7 +1662,7 @@ A text folding minor mode for Emacs.
                 ("M-<f1>" . origami-toggle-node)
                 ("M-<f2>" . origami-toggle-all-nodes)))
 #+END_SRC
-*** lsp-env
+*** COMMENT lsp-env
 Language Server Protocol Support for Emacs
 [[https://emacs-lsp.github.io/lsp-mode/][LSP mode and friends]]
 [[https://emacs-lsp.github.io/lsp-mode/page/installation/][Lsp Instalation]]
@@ -1869,45 +1879,6 @@ functionality offered by lsp-mode.
   ;;("M-2 g" . lsp-treemacs-java-deps-refresh)
   )
 #+END_SRC
-**** flycheck
-Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs,
-intended as replacement for the older Flymake extension which is part of GNU
-Emacs.
-Flycheck automatically checks buffers for errors while you type, and reports
-warnings and errors directly in the buffer and in an optional IDE-like error
-list.
-[[http://www.flycheck.org][Flycheck site]]
-
-#+NAME: flycheck
-#+BEGIN_SRC emacs-lisp
-(use-package flycheck
-  :init
-  (add-to-list 'display-buffer-alist
-               `(,(rx bos "*Flycheck errors*" eos)
-                 (display-buffer-reuse-window
-                  display-buffer-in-side-window)
-                 (side            . bottom)
-                 (reusable-frames . visible)
-                 (window-height   . 0.15)))
-  :hook 
-  (prog-mode . flycheck-mode)
-
-  :custom
-  (flycheck-emacs-lisp-load-path 'inherit)
-  ;;  (flycheck-emacs-lisp-load-path ())
-  (flycheck-disabled-checkers '(emacs-lisp-checkdoc))
-  (flycheck-keymap-prefix (kbd "M-4"))) ;;flycheck prefix for quickly work with code check
-#+END_SRC
-**** dap (debug adapter protocol)
-***** Dap-mode
-Debug Adapter Protocol client for Emacs.
-[[https://github.com/yyoncho/dap-mode][Dap-mode GitHub]]
-#+NAME: dap-mode
-#+BEGIN_SRC emacs-lisp
-(use-package dap-mode 
-:after lsp-mode
-:config (dap-auto-configure-mode))
-#+END_SRC
 *** lisp-env
 **** TODO slime
 SLIME is the Superior Lisp Interaction Mode for Emacs
@@ -1976,6 +1947,45 @@ A extensible, modular GNU Emacs front-end for interacting with external debugger
 #+NAME: realgud
 #+BEGIN_SRC emacs-lisp
 (use-package realgud)
+#+END_SRC
+**** flycheck
+Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs,
+intended as replacement for the older Flymake extension which is part of GNU
+Emacs.
+Flycheck automatically checks buffers for errors while you type, and reports
+warnings and errors directly in the buffer and in an optional IDE-like error
+list.
+[[http://www.flycheck.org][Flycheck site]]
+
+#+NAME: flycheck
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck
+  :init
+  (add-to-list 'display-buffer-alist
+               `(,(rx bos "*Flycheck errors*" eos)
+                 (display-buffer-reuse-window
+                  display-buffer-in-side-window)
+                 (side            . bottom)
+                 (reusable-frames . visible)
+                 (window-height   . 0.15)))
+  :hook 
+  (prog-mode . flycheck-mode)
+
+  :custom
+  (flycheck-emacs-lisp-load-path 'inherit)
+  ;;  (flycheck-emacs-lisp-load-path ())
+  (flycheck-disabled-checkers '(emacs-lisp-checkdoc))
+  (flycheck-keymap-prefix (kbd "M-4"))) ;;flycheck prefix for quickly work with code check
+#+END_SRC
+***** dap (debug adapter protocol)
+****** Dap-mode
+Debug Adapter Protocol client for Emacs.
+[[https://github.com/yyoncho/dap-mode][Dap-mode GitHub]]
+#+NAME: dap-mode
+#+BEGIN_SRC emacs-lisp
+(use-package dap-mode 
+:after lsp-mode
+:config (dap-auto-configure-mode))
 #+END_SRC
 *** config
 [[https://github.com/yoshiki/yaml-mode][Yaml-mode Github]]
@@ -2093,6 +2103,12 @@ Fix some issues with straight.el and org until that is resolved.
    'org-babel-load-languages
    '((java . t)
      (emacs-lisp.t))))
+#+END_SRC
+**** Org-Agenda
+#+NAME: org-agenda
+#+BEGIN_SRC emacs-lisp
+(use-package org
+  :config)
 #+END_SRC
 **** Org-Bullets
  #+BEGIN_SRC emacs-lisp
@@ -2683,32 +2699,3 @@ Here we close the let expression from the preface.
 #+BEGIN_SRC emacs-lisp
 (setq gc-cons-threshold (* 2 1000 1000))
 #+END_SRC
-* info-notes
-** advantage features
-*** text
-**** text objects
-***** sentences
-Переменная *sentence-end-double-space* контролирует конвенции по разделению предложений в тексте.  Если значение t (по умолчанию) тогда после конца фразы нужно ставить 2 пробела.  Думаю можно установить переменную в nil для обеспечения привычности пользования
-
-**** text mode
-Базовый режим для редактирования простого текста
-
-paragraph-indent-text-mode
-Основной режим для разделения абзацев по отступам первой строки
-Нет нужды разделения пустой линией
-
-paragraph-indent-minor-mode
-То же что и выше но для дополнительный режим
-
-Автодополнение слов из словаря
-M-<TAB> ispell-complete-word
-
-**** outline mode
-***** outline-mode
-Даный режим предназначен для навигации и редактирования
-outline текстовых структур
-Позволяет легко просматривать большые файлы скрывая
-или открывая текстовые структуры
-***** outline-minor-mode
-Предназначен для совмесной работы с другими major-modes
-****** Foldout

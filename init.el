@@ -169,7 +169,7 @@
 '(font . "JetBrains Mono-13"))
 
 ;;(global-visual-line-mode 1)
-(add-hook 'text-mode-hook '(lambda () (visual-line-mode 1)))
+;;(add-hook 'text-mode-hook '(lambda () (visual-line-mode 1)))
 
 ;; Longer whitespace, otherwise syntax highlighting is limited to default column
 (setq whitespace-line-column 500)
@@ -1027,8 +1027,17 @@
   (setq ediff-keep-variants nil)
   (setq ediff-make-buffers-readonly-at-startup t)
   (setq ediff-show-clashes-only nil) ;;all regions or only differences
-  (setq ediff-split-window-function 'split-window-horizontally)
-  (setq ediff-window-setup-function 'ediff-setup-windows-plain))
+  ;; (setq ediff-split-window-function 'split-window-horizontally)
+  (setq ediff-split-window-function 'split-window-vertically)
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+
+  ;;disable question for close ediff session
+  (defun disable-y-or-n-p (orig-fun &rest args)
+    (cl-letf (((symbol-function 'y-or-n-p) (lambda (prompt) t)))
+      (apply orig-fun args)))
+  (advice-add 'ediff-quit :around #'disable-y-or-n-p)
+
+  )
 
 ;;===================================================================
 ;;TREEMACS
@@ -1178,175 +1187,6 @@
               ("M-<f1>" . origami-toggle-node)
               ("M-<f2>" . origami-toggle-all-nodes)))
 
-(use-package lsp-mode
-  :hook
-  (lsp-mode . lsp-enable-which-key-integration)
-  (lsp-mode . lsp-lens-mode)
-  (yaml-mode . lsp-deferred)
-  (web-mode . lsp-deferred)
-;;  (lsp-mode . lsp-treemacs-generic-mode)
-  :custom
-  (lsp-completion-enable-additional-text-edit nil)
-  (lsp-headerline-breadcrumb-segments '(project file symbols))
-  (lsp-keymap-prefix "H-f")
-  (lsp-print-io t)
-  (lsp-pring-performance nil)
-  (lsp-server-trace "verbose")
-
-  ;;(lsp-enable-snippet t) ;;default
-  ;;(lsp-auto-guess-root nil) ;;default
-  ;;(lsp-eldoc-render-all nil) ;;default
-  ;;(lsp-diagnostics-provider :auto) ;;default flaycheck or fallback to flymake
-  ;;(lsp-enable-file-watchers t) ;;default
-  ;;(lsp-semantic-tokens-enable nil) ;;default
-
-  :bind
-  (:map lsp-mode-map
-	("M-<insert>" . lsp-execute-code-action)))
-
-(use-package lsp-mode
-  :custom
-  (lsp-xml-format-enabled nil))
-
-(use-package lsp-mode
-  :config
-  (setq lsp-groovy-server-file "~/git/groovy-language-server/build/libs/groovy-language-server-all.jar")
-  ;;(setq lsp-groovy-classpath ["/usr/share/groovy/lib"])
-  )
-
-(use-package lsp-ui
-  :commands lsp-ui-mode)
-
-(use-package lsp-ui
-  :config
-  ;;  (setq lsp-ui-sideline-update-mode 'line)
-  :custom
-  (lsp-ui-sideline-show-hover nil)
-  (lsp-ui-sideline-ignore-dublicate t)
-  (lsp-ui-sideline-delay 0.5)
-  :bind (:map lsp-ui-mode-map
-	      ("M-RET" . lsp-ui-sideline-apply-code-actions)
-	      ("M-2 m" . lsp-ui-imenu)))
-
-(use-package lsp-ui
-:bind
-(:map lsp-ui-mode-map
-      ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
-      ([remap xref-find-references] . lsp-ui-peek-find-references))
-)
-
-(use-package lsp-ui
-  :custom
-  (lsp-ui-doc-delay nil)
-  :config
-  (setq lsp-ui-doc-position 'top)
-  (setq lsp-ui-doc-alignment 'window)
-  (setq lsp-ui-doc-max-width 65)
-  (setq lsp-ui-doc-max-height 15)
-  (setq lsp-ui-doc)
-  (setq lsp-ui-doc-include-signature t)
-
-;;  (defun q/test-fun (content)
-;;    "Hello!")
-
-;;  (setq lsp-ui-doc-render-function #'q/test-fun)
-
-  ;;Custom function
-  (defun q/lsp-ui-doc-show ()
-    (interactive)
-    (lsp-ui-doc-show)
-    (lsp-ui-doc-focus-frame))
-  (defun q/lsp-ui-doc-hide ()
-    (interactive)
-    (lsp-ui-doc-unfocus-frame)
-    (lsp-ui-doc-hide))
-  
-  :bind
-  (:map lsp-ui-doc-mode-map
-	("M-q" . q/lsp-ui-doc-show))
-  
-  (:map lsp-ui-doc-frame-mode-map
-	("q" . q/lsp-ui-doc-hide)
-        ("C-g" . q/lsp-ui-doc-hide)
-	("n" . next-line)
-	("p" . previous-line)
-	("j" . next-line)
-	("k" . previous-line)))
-
-(use-package lsp-java
-  :init
-  ;;(setenv "JAVA_HOME" "/usr/lib/jvm/java-11-openjdk/")
-  (setenv "JAVA_HOME" "/usr/lib/jvm/default/")
-  :hook
-  (java-mode . lsp-java-lens-mode)
-  (java-mode . lsp-jt-lens-mode)
-  ;;(java-mode . lsp-java-boot-lens-mode)
-  
-  (java-mode . lsp)
-  
-
-  :custom
-  ;; Don't organise imports on save
-  (lsp-java-save-action-organize-imports nil)
-
-  ;; Fetch less results from the Eclipse server
-  (lsp-java-completion-max-results 30)
-
-  ;; Currently (2019-04-24), dap-mode works best with Oracle
-  ;; JDK, see https://github.com/emacs-lsp/dap-mode/issues/31
-  ;;
-  ;; lsp-java-java-path "~/.emacs.d/oracle-jdk-12.0.1/bin/java"
-  ;;(lsp-java-java-path "/usr/lib/jvm/java-11-openjdk/bin/java")
-  (lsp-java-java-path "/usr/lib/jvm/default/bin/java")
-
-  ;;===============================================================
-  ;;Additionals
-  (lsp-java-pop-buffer-function 'company-box-doc-manually)
-  (lsp-java-maven-download-sources t)
-  )
-
-(use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
-
-(use-package lsp-treemacs
-  :after lsp-mode
-  :commands lsp-treemacs-errors-list
-  :init
-  (global-unset-key (kbd "M-2"))
-  :config
-  (lsp-treemacs-sync-mode 1)
-  :bind
-  ("M-2 h" . lsp-treemacs-call-hierarchy)
-  ("M-2 s" . lsp-treemacs-symbols)
-  ("M-2 r" . lsp-treemacs-references)
-  ("M-2 e" . lsp-treemacs-errors-list)
-  ("M-2 i" . lsp-treemacs-implementations)
-  ("M-2 l" . lsp-treemacs-java-deps-list)
-  ;; ("M-2 f" . lsp-treemacs-java-deps-follow)
-  ;;("M-2 g" . lsp-treemacs-java-deps-refresh)
-  )
-
-(use-package flycheck
-  :init
-  (add-to-list 'display-buffer-alist
-               `(,(rx bos "*Flycheck errors*" eos)
-                 (display-buffer-reuse-window
-                  display-buffer-in-side-window)
-                 (side            . bottom)
-                 (reusable-frames . visible)
-                 (window-height   . 0.15)))
-  :hook 
-  (prog-mode . flycheck-mode)
-
-  :custom
-  (flycheck-emacs-lisp-load-path 'inherit)
-  ;;  (flycheck-emacs-lisp-load-path ())
-  (flycheck-disabled-checkers '(emacs-lisp-checkdoc))
-  (flycheck-keymap-prefix (kbd "M-4"))) ;;flycheck prefix for quickly work with code check
-
-(use-package dap-mode 
-:after lsp-mode
-:config (dap-auto-configure-mode))
-
 ;;(use-package slime)
 
 ;;(use-package geiser)
@@ -1373,6 +1213,28 @@
   )
 
 (use-package realgud)
+
+(use-package flycheck
+  :init
+  (add-to-list 'display-buffer-alist
+               `(,(rx bos "*Flycheck errors*" eos)
+                 (display-buffer-reuse-window
+                  display-buffer-in-side-window)
+                 (side            . bottom)
+                 (reusable-frames . visible)
+                 (window-height   . 0.15)))
+  :hook 
+  (prog-mode . flycheck-mode)
+
+  :custom
+  (flycheck-emacs-lisp-load-path 'inherit)
+  ;;  (flycheck-emacs-lisp-load-path ())
+  (flycheck-disabled-checkers '(emacs-lisp-checkdoc))
+  (flycheck-keymap-prefix (kbd "M-4"))) ;;flycheck prefix for quickly work with code check
+
+(use-package dap-mode 
+:after lsp-mode
+:config (dap-auto-configure-mode))
 
 (use-package yaml-mode
   :mode ("\\.yml\\'" . yaml-mode))
@@ -1460,6 +1322,9 @@
    'org-babel-load-languages
    '((java . t)
      (emacs-lisp.t))))
+
+(use-package org
+  :config)
 
 (use-package org-bullets
     :after (org org-journal)
