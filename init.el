@@ -142,8 +142,8 @@
 (defvar q/bookmarks-file-name (q/get-org-file "bookmarks/bookmarks.org") "Main bookmarks file-name")
 
 ;;storages dir
-(defvar q/autosaves-directory (concat q/data-directory "autosaves/") "Main bookmarks file-name")
-(defvar q/backups-directory (concat q/data-directory "backups/") "Main bookmarks file-name")
+(defvar q/autosaves-directory (concat q/data-directory "autosaves/") "Main autosaves directory")
+(defvar q/backups-directory (concat q/data-directory "backups/") "Main backups directory")
 
 (customize-set-variable 'browse-url-browser-function  'browse-url-chromium)
 
@@ -166,7 +166,7 @@
 (add-to-list 'default-frame-alist
 ;;'(font . "Comic Sans MS-14")
 ;;'(font . "Hack-14")
-'(font . "JetBrains Mono-13"))
+'(font . "JetBrains Mono-16"))
 
 ;;(global-visual-line-mode 1)
 ;;(add-hook 'text-mode-hook '(lambda () (visual-line-mode 1)))
@@ -997,24 +997,6 @@
                ("S" . mc/reverse-regions))
   )
 
-(use-package edit-server
-  :commands edit-server-start
-  :init (if after-init-time
-              (edit-server-start)
-            (add-hook 'after-init-hook
-                      #'(lambda() (edit-server-start))))
-  :config (setq edit-server-new-frame-alist
-                '((name . "Edit with Emacs FRAME")
-                  (top . 300)
-                  (left . 300)
-                  (width . 50)
-                  (height . 15)
-                  (minibuffer . t)
-;;                  (menu-bar-lines . x ;TODO: )
-                  (window-system . x))))
-
-(use-package paradox)
-
 (use-package magit
   :bind
   ("M-9" . magit-status)
@@ -1180,22 +1162,6 @@
 
 ;;(use-package ibuffer-projectile)
 
-(use-package origami
-
-  :init (origami-mode 1)
-  :bind (:map origami-mode-map
-              ("M-<f1>" . origami-toggle-node)
-              ("M-<f2>" . origami-toggle-all-nodes)))
-
-;;(use-package slime)
-
-;;(use-package geiser)
-
-(use-package groovy-mode
-  :custom (groovysh "/usr/bin/groovysh"))
-
-(use-package grails-mode)
-
 (use-package web-mode
   :mode
   ("\\.phtml\\'" . web-mode)
@@ -1211,36 +1177,6 @@
   ("\\x[ms]l\\'" . web-mode)
   ("\\.dbk\\'" . web-mode)
   )
-
-(use-package realgud)
-
-(use-package flycheck
-  :init
-  (add-to-list 'display-buffer-alist
-               `(,(rx bos "*Flycheck errors*" eos)
-                 (display-buffer-reuse-window
-                  display-buffer-in-side-window)
-                 (side            . bottom)
-                 (reusable-frames . visible)
-                 (window-height   . 0.15)))
-  :hook 
-  (prog-mode . flycheck-mode)
-
-  :custom
-  (flycheck-emacs-lisp-load-path 'inherit)
-  ;;  (flycheck-emacs-lisp-load-path ())
-  (flycheck-disabled-checkers '(emacs-lisp-checkdoc))
-  (flycheck-keymap-prefix (kbd "M-4"))) ;;flycheck prefix for quickly work with code check
-
-(use-package dap-mode 
-:after lsp-mode
-:config (dap-auto-configure-mode))
-
-(use-package yaml-mode
-  :mode ("\\.yml\\'" . yaml-mode))
-
-(add-hook 'compilation-filter-hook
-          (lambda () (ansi-color-apply-on-region (point-min) (point-max))))
 
 ;; (defun fix-org-git-version ()
 ;;   "The Git version of org-mode.
@@ -1320,8 +1256,9 @@
   ;;load languages for babel mode in orgmode
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '((java . t)
-     (emacs-lisp.t))))
+   '((java.t)
+     (emacs-lisp.t)
+     (shell . t))))
 
 (use-package org
   :config)
@@ -1563,10 +1500,6 @@
   (setq yas-wrap-around-region t)
   (yas-global-mode))
 
-(use-package yasnippet-snippets)
-
-;;  (use-package maxima)
-
 (use-package diminish)
 (use-package delight)
 
@@ -1611,54 +1544,6 @@
   (define-globalized-minor-mode q/global-rainbow-mode rainbow-mode
     (lambda () (rainbow-mode +1)))
   (q/global-rainbow-mode))
-
-;; Functions for random set color for
-;;=====================================================================================
-(defun gen-col-list (length s v &optional hval)
-  (cl-flet ( (random-float () (/ (random 10000000000) 10000000000.0))
-          (mod-float (f) (- f (ffloor f))) )
-    (unless hval
-      (setq hval (random-float)))
-    (let ((golden-ratio-conjugate (/ (- (sqrt 5) 1) 2))
-          (h hval)
-          (current length)
-          (ret-list '()))
-      (while (> current 0)
-        (setq ret-list
-              (append ret-list
-                      (list (apply 'color-rgb-to-hex (color-hsl-to-rgb h s v)))))
-        (setq h (mod-float (+ h golden-ratio-conjugate)))
-        (setq current (- current 1)))
-      ret-list)))
-
-(defun set-random-rainbow-colors (s l &optional h)
-  ;; Output into message buffer in case you get a scheme you REALLY like.
-  ;; (message "set-random-rainbow-colors %s" (list s l h))
-  (interactive)
-  (rainbow-delimiters-mode t)
-
-  ;; Show mismatched braces in bright red.
-  (set-face-background 'rainbow-delimiters-unmatched-face "red")
-
-  ;; Rainbow delimiters based on golden ratio
-  (let ( (colors (gen-col-list 9 s l h))
-         (i 1) )
-    (let ( (length (length colors)) )
-      ;;(message (concat "i " (number-to-string i) " length " (number-to-string length)))
-      (while (<= i length)
-        (let ( (rainbow-var-name (concat "rainbow-delimiters-depth-" (number-to-string i) "-face"))
-               (col (nth i colors)) )
-          ;; (message (concat rainbow-var-name " => " col))
-          (set-face-foreground (intern rainbow-var-name) col))
-        (setq i (+ i 1))))))
-
-(use-package rainbow-delimiters
-  :commands rainbow-delimiters-mode
-  :init
-  (setq rainbow-delimiters-max-face-count 16)
- (set-random-rainbow-colors 0.6 0.7 0.5)
-  :hook
-  (prog-mode . rainbow-delimiters-mode))
 
 ;;Taken this config from https://protesilaos.
 (use-package ediff
