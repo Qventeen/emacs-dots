@@ -997,6 +997,8 @@
                ("S" . mc/reverse-regions))
   )
 
+(use-package paradox)
+
 (use-package magit
   :bind
   ("M-9" . magit-status)
@@ -1178,6 +1180,13 @@
   ("\\.dbk\\'" . web-mode)
   )
 
+(use-package php-mode)
+
+(use-package yaml-mode
+  :mode ("\\.yml\\'" . yaml-mode)
+  :bind (:map yaml-mode-map
+	      ("C-m" . 'newline-and-indent)))
+
 ;; (defun fix-org-git-version ()
 ;;   "The Git version of org-mode.
 ;;   Inserted by installing org-mode or when a release is made."
@@ -1333,8 +1342,6 @@
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((plantuml . t))))
-
-(use-package logview)
 
 (use-package company
   :diminish 
@@ -1536,14 +1543,6 @@
 ;;(load-theme 'doom-dark+ t)
 ;;(load-theme 'doom-zenburn t)
 )
-
-(use-package rainbow-mode
-  :commands (rainbow-mode)
-  :config
-  ;;devfine global minor mode from simple minor mode
-  (define-globalized-minor-mode q/global-rainbow-mode rainbow-mode
-    (lambda () (rainbow-mode +1)))
-  (q/global-rainbow-mode))
 
 ;;Taken this config from https://protesilaos.
 (use-package ediff

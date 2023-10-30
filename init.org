@@ -213,7 +213,6 @@ Calculate file paths relative to various locations.
 *** midifier-key-bind
 This page shows you how to define Super and Hyper keys in emacs
 [[http://ergoemacs.org/emacs/emacs_hyper_super_keys.html][XanEmacs tutorial bind]]
-
 * fixes
 ** package cl deprecated
 Emacs 27 and onward deprecates the built-in cl library (to be replaced with cl-lib). Emacs emits this warning whenever something, somewhere loads it at runtime. Doom does not use cl, but a number of 3rd party packages do, which is outside my control. Emacs offers no method to suppress the error and neither can Doom (trivially). Our only options are to ignore it and wait for packages upstream to catch up, or PR updates to those packages directly.
@@ -251,7 +250,7 @@ Emacs 27 and onward deprecates the built-in cl library (to be replaced with cl-l
 #+END_SRC
 *** display
 **** visual-line-mode
-This mode haw little performance. Instead i use visual-fill-mode
+This mode has little performance. Instead I use visual-fill-mode
 #+NAME: global-visual-mode
 #+BEGIN_SRC emacs-lisp
 ;;(global-visual-line-mode 1)
@@ -383,8 +382,8 @@ exit-language-environment-hook
 **** inputs methods
 M-x set-input-method (Ukrania or Russian)
 Позволяет выбирать любой метод ввода
-Думаю удобно привязат переключение метода ввода
-К определенной клавише либо
+Думаю удобно привязать переключение метода ввода
+К определенной клавише
 ** advance
 *** indendation
 #+BEGIN_SRC emacs-lisp
@@ -1428,7 +1427,7 @@ with sockets in Emacs. I based it on the following examples:
                   (window-system . x))))
 #+END_SRC
 
-** COMMENT packages
+** packages
 #+NAME: paradox
 #+BEGIN_SRC emacs-lisp
 (use-package paradox)
@@ -1941,6 +1940,15 @@ This is compatible with many template engines: PHP, JSP, ASP, Django,
 Twig, Jinja, Mustache, ERB, FreeMarker, Velocity, Cheetah, Smarty, CTemplate,
 Mustache, Blade, ErlyDTL, Go Template, Dust.js, Google Closure (soy),
 React/JSX, Angularjs, ejs, Nunjucks, etc.
+**** php-mode
+[[https://github.com/emacs-php/php-mode][GitHub php-mode]]
+#+NAME: php-mode
+#+BEGIN_SRC emacs-lisp
+(use-package php-mode)
+#+END_SRC
+
+#+RESULTS: php-mode
+
 *** COMMENT debug
 **** realgud
 A extensible, modular GNU Emacs front-end for interacting with external debuggers
@@ -1989,12 +1997,14 @@ Debug Adapter Protocol client for Emacs.
 :after lsp-mode
 :config (dap-auto-configure-mode))
 #+END_SRC
-*** COMMENT config
+*** config
 [[https://github.com/yoshiki/yaml-mode][Yaml-mode Github]]
 #+NAME: yaml-mode
 #+BEGIN_SRC emacs-lisp
 (use-package yaml-mode
-  :mode ("\\.yml\\'" . yaml-mode))
+  :mode ("\\.yml\\'" . yaml-mode)
+  :bind (:map yaml-mode-map
+	      ("C-m" . 'newline-and-indent)))
 #+END_SRC
 This is a major mode for editing files in the YAML data
 serialization format.  It was initially developed by Yoshiki
@@ -2211,7 +2221,7 @@ another markup language.
         'org-babel-load-languages
         '((plantuml . t))))
    #+END_SRC
-*** logview
+*** COMMENT logview
 [[https://github.com/doublep/logview][Logview-mode Github]]
 #+NAME: logview-mode
 #+BEGIN_SRC emacs-lisp
@@ -2473,6 +2483,9 @@ Official snippet collection for the yasnippet package.
 
    #+END_SRC
 
+   #+RESULTS:
+   | doom-modeline-mode | ivy-mode | global-company-mode | counsel-projectile-mode | turn-on-smartparens-mode | show-paren-mode | #[0 \303\235\203 \304\303"\301\305!\210	\205 \306 \210\307\211\207 [command-line-args desktop-save-mode inhibit-startup-screen --no-desktop delete 0 desktop-read t] 3] | x-wm-set-size-hint | tramp-register-archive-file-name-handler | magit-maybe-define-global-key-bindings | table--make-cell-map |
+
 ** keybind
 *** which-key
 Which-key is a minor mode for Emacs that displays the key bindings following your currently entered incomplete command (a prefix) in a popup.
@@ -2553,7 +2566,7 @@ major mode specific key bindings.
 
  #+END_SRC
 *** faces
-**** DONE rainbow-mode
+**** COMMENT rainbow-mode
 This minor mode sets background color to strings that match color
 names, e.g. #0000ff is displayed in white with a blue background.
 [[http://elpa.gnu.org/packages/rainbow-mode.html][Rainbow elpa]]
