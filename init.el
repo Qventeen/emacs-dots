@@ -243,8 +243,21 @@
 
 (setq revert-without-query '("\\.png"))
 
+(setq revert-without-query '("\\.png"))
+
 ;;C-q quoted-insert = 10 radix
 (setq read-quoted-char-radix 10)
+
+;; UTF-8 as default encoding
+(set-language-environment 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-keyboard-coding-system 'utf-8-unix)
+
+;; add this especially on Windows, else python output problem
+(set-terminal-coding-system 'utf-8-unix)
+
+;; UTF-8 as default encoding
+(modify-coding-system-alist 'file "" 'utf-8-unix)
 
 ;;Задаем ширину отступа в четыре пробела
 (setq tab-width 4)
@@ -1534,6 +1547,13 @@
 (use-package command-log-mode
   :custom
   (command-log-mode-key-binding-open-log "<f12>"))
+
+;;EMACS THEMES
+;;===============================================================
+(use-package wakatime-mode
+ :commands (global-wakatime-mode)
+ :custom
+ (wakatime-cli-path "~/.wakatime/wakatime-cli"))
 
 ;;EMACS THEMES
 ;;===============================================================

@@ -359,6 +359,10 @@ Backups are created everytime a buffer is manually saved.
 #+BEGIN_SRC emacs-lisp
   (setq revert-without-query '("\\.png"))
 #+END_SRC
+**** codepages
+#+BEGIN_SRC emacs-lisp
+  (setq revert-without-query '("\\.png"))
+#+END_SRC
 *** international
 **** coding chars
 Insert chars for 10-x number
@@ -367,11 +371,12 @@ Insert chars for 10-x number
 (setq read-quoted-char-radix 10)
 #+END_SRC
 **** language environments
+***** notes
 Стандартный и лучший вариант UTF-8
 M-x set-language-environments
 Переменная
 current-language-environment t
-***** Usefull hooks
+****** Usefull hooks
 set-language-environment-hook
 Позволяет настроить выбранное языковое пространство
 команда установки языковой среды вызывает данный хук после
@@ -379,6 +384,24 @@ set-language-environment-hook
 
 exit-language-environment-hook
 Нужен для отмены установленных в предыдущем хуке изменений
+***** code
+#+NAME: language settings
+#+BEGIN_SRC emacs-lisp
+;; UTF-8 as default encoding
+(set-language-environment 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-keyboard-coding-system 'utf-8-unix)
+
+;; add this especially on Windows, else python output problem
+(set-terminal-coding-system 'utf-8-unix)
+
+#+END_SRC
+**** coding usage
+#+NAME: language settings
+#+BEGIN_SRC emacs-lisp
+;; UTF-8 as default encoding
+(modify-coding-system-alist 'file "" 'utf-8-unix)
+#+END_SRC
 **** inputs methods
 M-x set-input-method (Ukrania or Russian)
 Позволяет выбирать любой метод ввода
@@ -2549,6 +2572,18 @@ major mode specific key bindings.
   :custom
   (command-log-mode-key-binding-open-log "<f12>"))
 #+END_SRC
+** monitoring
+ В этом разделе произвожу запуск wakatime для отслеживания времени проведенного внутри emacs
+
+#+NAME: wakatime 
+#+BEGIN_SRC emacs-lisp
+;;EMACS THEMES
+;;===============================================================
+(use-package wakatime-mode
+ :commands (global-wakatime-mode)
+ :custom
+ (wakatime-cli-path "~/.wakatime/wakatime-cli"))
+ #+END_SRC
 ** apperiance
 *** themes
  В этом разделе произвожу конфигурацию внешнего вида редактора
