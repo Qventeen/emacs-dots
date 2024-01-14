@@ -208,7 +208,8 @@ Calculate file paths relative to various locations.
 *** external-browser
 #+NAME: defoult-browser
 #+BEGIN_SRC emacs-lisp
-(customize-set-variable 'browse-url-browser-function  'browse-url-chromium)
+(setq browse-url-browser-function 'browse-url-generic
+          browse-url-generic-program "google-chrome-stable")
 #+END_SRC
 *** midifier-key-bind
 This page shows you how to define Super and Hyper keys in emacs
@@ -2580,9 +2581,9 @@ major mode specific key bindings.
 ;;EMACS THEMES
 ;;===============================================================
 (use-package wakatime-mode
- :commands (global-wakatime-mode)
- :custom
- (wakatime-cli-path "~/.wakatime/wakatime-cli"))
+ :init (global-wakatime-mode 1)
+ :custom (wakatime-cli-path "~/.wakatime/wakatime-cli"))
+
  #+END_SRC
 ** apperiance
 *** themes

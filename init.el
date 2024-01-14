@@ -145,7 +145,8 @@
 (defvar q/autosaves-directory (concat q/data-directory "autosaves/") "Main autosaves directory")
 (defvar q/backups-directory (concat q/data-directory "backups/") "Main backups directory")
 
-(customize-set-variable 'browse-url-browser-function  'browse-url-chromium)
+(setq browse-url-browser-function 'browse-url-generic
+          browse-url-generic-program "google-chrome-stable")
 
 (setq byte-compile-warnings '(cl-functions))
 
@@ -1551,9 +1552,8 @@
 ;;EMACS THEMES
 ;;===============================================================
 (use-package wakatime-mode
- :commands (global-wakatime-mode)
- :custom
- (wakatime-cli-path "~/.wakatime/wakatime-cli"))
+ :init (global-wakatime-mode 1)
+ :custom (wakatime-cli-path "~/.wakatime/wakatime-cli"))
 
 ;;EMACS THEMES
 ;;===============================================================
