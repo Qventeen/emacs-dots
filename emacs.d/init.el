@@ -1279,8 +1279,9 @@
   ;;load languages for babel mode in orgmode
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '((java.t)
-     (emacs-lisp.t)
+   '((java . t)
+     (emacs-lisp . t)
+     (sql . t)
      (shell . t))))
 
 (use-package org
@@ -1468,7 +1469,7 @@
   :custom 
   (swiper-verbose nil)
   (swiper-use-visual-line t)
-
+  
   :bind
   ;;Ivy-based interface to standard commands
   ("C-s" . swiper-isearch)

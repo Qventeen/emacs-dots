@@ -2137,8 +2137,9 @@ Fix some issues with straight.el and org until that is resolved.
   ;;load languages for babel mode in orgmode
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '((java.t)
-     (emacs-lisp.t)
+   '((java . t)
+     (emacs-lisp . t)
+     (sql . t)
      (shell . t))))
 #+END_SRC
 **** Org-Agenda
