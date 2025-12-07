@@ -1552,10 +1552,6 @@
 
 ;;EMACS THEMES
 ;;===============================================================
-(use-package wakatime-mode
- :init (global-wakatime-mode 1)
- :custom (wakatime-cli-path "~/.wakatime/wakatime-cli"))
-
 ;;EMACS THEMES
 ;;===============================================================
 (use-package doom-themes 
