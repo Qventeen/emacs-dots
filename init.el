@@ -46,6 +46,7 @@
 
 (defvar q/home-directory (file-name-as-directory (expand-file-name "~")))
 (defvar q/data-directory (file-name-as-directory user-emacs-directory))
+(defvar q/cache-directory (expand-file-name ".cache/" q/data-directory))
 (defvar q/config-directory (expand-file-name "configs/" q/data-directory))
 (defvar q/org-directory (expand-file-name "org/" q/home-directory))
 (defvar q/notebase-directory
@@ -64,6 +65,7 @@
 (when (eq system-type 'windows-nt)
   (setq q/home-directory (file-name-as-directory (expand-file-name "d:/"))
         q/data-directory (expand-file-name "Emacs/" q/home-directory)
+        q/cache-directory (expand-file-name ".cache/" q/data-directory)
         q/config-directory (expand-file-name "configs/" q/data-directory)
         q/org-directory (expand-file-name "org/" q/home-directory)
         q/notebase-directory (expand-file-name "notebase/" q/home-directory)
@@ -96,7 +98,7 @@
 (defvar q/notebase-notes-file (q/get-notebase-file "notes.org"))
 
 (mapc #'q/ensure-directory
-      (list q/autosaves-directory q/backups-directory q/notebase-directory q/org-directory
+      (list q/cache-directory q/autosaves-directory q/backups-directory q/notebase-directory q/org-directory
             q/org-roam-directory q/org-attach-directory
             (expand-file-name "literature/" q/org-roam-directory)
             (expand-file-name "notebooklm/" q/org-roam-directory)))
@@ -652,7 +654,7 @@
   :after org
   :custom
   (org-roam-directory (file-truename q/org-roam-directory))
-  (org-roam-db-location (expand-file-name "org-roam.db" q/data-directory))
+  (org-roam-db-location (expand-file-name "org-roam.db" q/cache-directory))
   (org-roam-database-connector 'sqlite-builtin)
   (org-roam-node-display-template
    (concat "${title:*} " (propertize "${tags:20}" 'face 'org-tag)))
