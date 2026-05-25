@@ -684,6 +684,8 @@ Org is the center of the system. General Org files live under =~/org/=; Notebase
 
   (use-package org-download
     :after org
+    :preface
+    (require 'url-handlers)
     :custom
     (org-download-method 'attach)
     (org-download-heading-lvl nil)

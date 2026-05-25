@@ -608,6 +608,8 @@
 
 (use-package org-download
   :after org
+  :preface
+  (require 'url-handlers)
   :custom
   (org-download-method 'attach)
   (org-download-heading-lvl nil)
