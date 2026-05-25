@@ -497,9 +497,9 @@
 
 (use-package flymake
   :straight nil
-  :bind (("M-4 b" . flymake-show-buffer-diagnostics)
-         ("M-4 n" . flymake-goto-next-error)
-         ("M-4 p" . flymake-goto-prev-error)))
+  :bind (("C-c e b" . flymake-show-buffer-diagnostics)
+         ("C-c e n" . flymake-goto-next-error)
+         ("C-c e p" . flymake-goto-prev-error)))
 
 (use-package eglot
   :straight nil
