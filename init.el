@@ -240,6 +240,8 @@
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
 (use-package marginalia
+  :bind (:map minibuffer-local-map
+              ("M-A" . marginalia-cycle))
   :after vertico
   :init
   (marginalia-mode 1))
@@ -296,6 +298,7 @@
 (use-package embark
   :bind (("C-." . embark-act)
          ("M-." . embark-dwim)
+         ("C-h b" . embark-bindings)
          ("C-h B" . embark-bindings))
   :init
   ;; Embark makes prefix discovery interactive.
@@ -363,12 +366,18 @@
          ("C-c C-j" . avy-resume)))
 
 (use-package helpful
-  :commands (helpful-at-point helpful-command helpful-callable helpful-variable helpful-key)
+  :commands (helpful-at-point helpful-command helpful-callable helpful-function helpful-variable helpful-key)
   :bind (("C-c C-d" . helpful-at-point)
          ("C-h C" . helpful-command)
+         ("C-h x" . helpful-command)
          ("C-h f" . helpful-callable)
+         ("C-h F" . helpful-function)
          ("C-h v" . helpful-variable)
          ("C-h k" . helpful-key)))
+
+(use-package discover-my-major
+  :commands discover-my-major
+  :bind ("C-h C-m" . discover-my-major))
 
 (use-package ibuffer
   :straight nil
@@ -462,6 +471,7 @@
   (treemacs-sorting 'alphabetic-asc)
   (treemacs-follow-after-init t)
   (treemacs-show-hidden-files t)
+  (treemacs-space-between-root-nodes nil)
   (treemacs-is-never-other-window nil)
   (treemacs-no-delete-other-windows nil)
   (treemacs-project-follow-cleanup t)
